@@ -89,7 +89,7 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
   
   return (
     <div 
-      className="flex items-center gap-2 p-2 rounded transition-colors"
+      className="flex items-center gap-2 p-2 rounded-2xl transition-colors"
       style={{
         '--hover-bg': hoverHex + '14'
       } as React.CSSProperties}
@@ -97,7 +97,7 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
     >
       <div 
-        className="w-12 h-12 rounded flex-shrink-0 relative"
+        className="w-12 h-12 rounded-2xl flex-shrink-0 relative"
         style={{ 
           backgroundColor: hex,
           opacity: opacity / 100,
@@ -120,7 +120,7 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
       </div>
       <button
         onClick={handleCopy}
-        className="p-1 rounded transition-colors"
+        className="p-1 rounded-2xl transition-colors"
         style={{
           color: rgbToHex(...oklchToRgb(0.5, 0.06, baseHue))
         }}
@@ -267,7 +267,7 @@ export default function PMDColorConverter() {
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div 
-          className="rounded-lg p-6 mb-6"
+          className="rounded-2xl p-6 mb-6"
           style={{ 
             backgroundColor: baseColor + 'A6',
             backdropFilter: 'blur(24px)',
@@ -343,7 +343,7 @@ export default function PMDColorConverter() {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleHueOffset}
-              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="relative inline-flex h-6 w-11 items-center rounded-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
                 backgroundColor: hueOffsetEnabled ? accentColor : surfaceColor + '3D'
               }}
@@ -453,7 +453,7 @@ export default function PMDColorConverter() {
                   <div className="text-xs font-medium font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Accent/Action</div>
                   
                   <button
-                    className="w-full p-2 rounded transition-opacity"
+                    className="w-full p-2 rounded-2xl transition-opacity"
                     style={{ 
                       backgroundColor: accentColor + 'CC',
                       border: `2px solid ${accentColor}`,
@@ -549,7 +549,7 @@ export default function PMDColorConverter() {
               
               {/* Compact Navigation */}
               <div className="mb-4">
-                <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Navigation</div>
+                <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Navigation</div>
                 <div 
                   className="flex items-center gap-2 p-2 rounded"
                   style={{ 
@@ -558,7 +558,7 @@ export default function PMDColorConverter() {
                     color: getThemeTextColor(surfaceColor + '14')
                   }}
                 >
-                  <div className="text-xs font-medium font-fredoka-semibold">PMD</div>
+                  <div className="text-xs font-medium font-fredoka-semibold" style={{ color: getContrastColor(baseColor) }}>PMD</div>
                   <div className="flex-1" />
                   <button 
                     className="px-2 py-1 rounded text-xs font-medium transition-opacity font-medium"
@@ -576,7 +576,7 @@ export default function PMDColorConverter() {
                     className="px-2 py-1 rounded text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: 'transparent',
-                      color: getThemeTextColor(surfaceColor + '14'),
+                      color: getContrastColor(baseColor),
                       border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
                     }}
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
@@ -590,12 +590,12 @@ export default function PMDColorConverter() {
               <div className="space-y-4">
                 {/* Form & Buttons */}
                 <div>
-                  <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Forms & Buttons</div>
+                  <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Forms & Buttons</div>
                   
                   <div className="space-y-2">
                     <input
                       type="email"
-                      className="w-full px-2 py-1 rounded text-xs focus:outline-none"
+                      className="w-full px-2 py-1 rounded-2xl text-xs focus:outline-none"
                       style={{
                         backgroundColor: surfaceColor + '14',
                         color: primaryColor,
@@ -636,7 +636,7 @@ export default function PMDColorConverter() {
                 
                 {/* Status & Alerts */}
                 <div>
-                  <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Status & Alerts</div>
+                  <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Status & Alerts</div>
                   
                   <div className="space-y-2">
                     <div 
@@ -664,7 +664,7 @@ export default function PMDColorConverter() {
                     </div>
                     
                     <div 
-                      className="p-2 rounded"
+                      className="p-2 rounded-2xl"
                       style={{ 
                         backgroundColor: accentColor + '14',
                         border: `2px solid ${accentColor}`,
@@ -682,7 +682,7 @@ export default function PMDColorConverter() {
                   <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Card Component</div>
                   
                   <div 
-                    className="p-3 rounded"
+                    className="p-3 rounded-2xl"
                     style={{ 
                       backgroundColor: surfaceColor + '14',
                       border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
