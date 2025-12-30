@@ -809,7 +809,7 @@ export default function PMDColorConverter() {
                           }}
                         />
                         <div 
-                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110"
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110 z-10"
                           style={{ 
                             backgroundColor: primaryColor,
                             borderColor: primaryColor,
@@ -817,19 +817,31 @@ export default function PMDColorConverter() {
                           }}
                           onMouseDown={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
+                            
+                            const startX = e.clientX;
+                            const startLevel = volumeLevel;
+                            const slider = e.currentTarget.parentElement!;
+                            const rect = slider.getBoundingClientRect();
+                            const width = rect.width;
+                            
                             const handleMouseMove = (moveEvent: MouseEvent) => {
-                              const slider = e.currentTarget.parentElement!;
-                              const rect = slider.getBoundingClientRect();
-                              const moveX = moveEvent.clientX - rect.left;
-                              const percentage = Math.round((moveX / rect.width) * 100);
-                              setVolumeLevel(Math.max(0, Math.min(100, percentage)));
+                              moveEvent.preventDefault();
+                              const deltaX = moveEvent.clientX - startX;
+                              const deltaPercentage = (deltaX / width) * 100;
+                              const newLevel = startLevel + deltaPercentage;
+                              setVolumeLevel(Math.round(Math.max(0, Math.min(100, newLevel))));
                             };
+                            
                             const handleMouseUp = () => {
                               document.removeEventListener('mousemove', handleMouseMove);
                               document.removeEventListener('mouseup', handleMouseUp);
+                              document.body.style.userSelect = '';
                             };
+                            
                             document.addEventListener('mousemove', handleMouseMove);
                             document.addEventListener('mouseup', handleMouseUp);
+                            document.body.style.userSelect = 'none';
                           }}
                         />
                       </div>
@@ -865,7 +877,7 @@ export default function PMDColorConverter() {
                           }}
                         />
                         <div 
-                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110"
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110 z-10"
                           style={{ 
                             backgroundColor: accentColor,
                             borderColor: accentColor,
@@ -873,19 +885,31 @@ export default function PMDColorConverter() {
                           }}
                           onMouseDown={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
+                            
+                            const startX = e.clientX;
+                            const startLevel = brightnessLevel;
+                            const slider = e.currentTarget.parentElement!;
+                            const rect = slider.getBoundingClientRect();
+                            const width = rect.width;
+                            
                             const handleMouseMove = (moveEvent: MouseEvent) => {
-                              const slider = e.currentTarget.parentElement!;
-                              const rect = slider.getBoundingClientRect();
-                              const moveX = moveEvent.clientX - rect.left;
-                              const percentage = Math.round((moveX / rect.width) * 100);
-                              setBrightnessLevel(Math.max(0, Math.min(100, percentage)));
+                              moveEvent.preventDefault();
+                              const deltaX = moveEvent.clientX - startX;
+                              const deltaPercentage = (deltaX / width) * 100;
+                              const newLevel = startLevel + deltaPercentage;
+                              setBrightnessLevel(Math.round(Math.max(0, Math.min(100, newLevel))));
                             };
+                            
                             const handleMouseUp = () => {
                               document.removeEventListener('mousemove', handleMouseMove);
                               document.removeEventListener('mouseup', handleMouseUp);
+                              document.body.style.userSelect = '';
                             };
+                            
                             document.addEventListener('mousemove', handleMouseMove);
                             document.addEventListener('mouseup', handleMouseUp);
+                            document.body.style.userSelect = 'none';
                           }}
                         />
                       </div>
