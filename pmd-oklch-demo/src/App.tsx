@@ -414,7 +414,7 @@ export default function PMDColorConverter() {
               
               <div className="grid grid-cols-1 gap-3">
                 <div className="space-y-2">
-                  <div className="text-xs font-medium font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Primary State</div>
+                  <div className="text-sm font-semibold font-fredoka-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Primary State</div>
                   
                   <div 
                     className="p-2 rounded"
@@ -423,8 +423,8 @@ export default function PMDColorConverter() {
                       border: `2px solid ${primaryColor}3D`
                     }}
                   >
-                    <div className="text-xs font-medium" style={{ color: primaryColor }}>Temperature</div>
-                    <div className="text-lg font-bold" style={{ color: primaryColor }}>72°F</div>
+                    <div className="text-sm font-medium font-fredoka" style={{ color: primaryColor }}>Temperature</div>
+                    <div className="text-lg font-bold font-fredoka" style={{ color: primaryColor }}>72°F</div>
                   </div>
                   
                   <div 
@@ -434,8 +434,8 @@ export default function PMDColorConverter() {
                       border: `2px solid ${primaryColor}3D`
                     }}
                   >
-                    <div className="text-xs" style={{ color: secondaryColor }}>System status</div>
-                    <div className="text-xs font-medium" style={{ color: primaryColor }}>Active</div>
+                    <div className="text-sm font-medium font-fredoka" style={{ color: secondaryColor }}>System status</div>
+                    <div className="text-sm font-semibold font-fredoka-semibold" style={{ color: primaryColor }}>Active</div>
                   </div>
                 </div>
                 
@@ -449,8 +449,8 @@ export default function PMDColorConverter() {
                       border: `2px solid ${auxColor}3D`
                     }}
                   >
-                    <div className="text-xs font-medium" style={{ color: auxColor }}>Temperature</div>
-                    <div className="text-lg font-bold" style={{ color: auxColor }}>95°F</div>
+                    <div className="text-sm font-medium font-fredoka" style={{ color: auxColor }}>Temperature</div>
+                    <div className="text-lg font-bold font-fredoka" style={{ color: auxColor }}>95°F</div>
                   </div>
                   
                   <div 
@@ -460,15 +460,15 @@ export default function PMDColorConverter() {
                       border: `2px solid ${auxColor}3D`
                     }}
                   >
-                    <div className="text-xs" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveAuxOffset)) }}>
+                    <div className="text-sm font-medium font-fredoka" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveAuxOffset)) }}>
                       System status
                     </div>
-                    <div className="text-xs font-medium" style={{ color: auxColor }}>Warning</div>
+                    <div className="text-sm font-semibold font-fredoka-semibold" style={{ color: auxColor }}>Warning</div>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="text-xs font-medium font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Accent/Action</div>
+                  <div className="text-sm font-semibold font-fredoka-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Accent/Action</div>
                   
                   <button
                     className="w-full p-2 rounded-2xl transition-opacity"
@@ -481,7 +481,7 @@ export default function PMDColorConverter() {
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
                     onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
                   >
-                    <div className="text-xs font-medium">Delete File</div>
+                    <div className="text-sm font-medium font-fredoka">Delete File</div>
                   </button>
                   
                   <div 
@@ -491,7 +491,7 @@ export default function PMDColorConverter() {
                       border: `2px solid ${primaryColor}3D`
                     }}
                   >
-                    <div className="text-xs" style={{ color: secondaryColor }}>
+                    <div className="text-sm font-medium font-fredoka" style={{ color: secondaryColor }}>
                       Learn more at{' '}
                       <span style={{ color: accentColor, cursor: 'pointer' }}>docs.example.com</span>
                     </div>
@@ -509,7 +509,7 @@ export default function PMDColorConverter() {
                 border: `2px solid ${primaryColor}3D`
               }}
             >
-              <h2 className="text-lg font-semibold mb-3" style={{ color: primaryColor }}>
+              <h2 className="text-lg font-semibold mb-3 font-fredoka-semibold" style={{ color: primaryColor }}>
                 Color Palette
               </h2>
               <div className="space-y-3">
@@ -558,7 +558,7 @@ export default function PMDColorConverter() {
                 border: `2px solid ${primaryColor}3D`
               }}
             >
-              <h2 className="text-lg font-semibold mb-3" style={{ color: primaryColor }}>
+              <h2 className="text-lg font-semibold mb-3 font-fredoka-semibold" style={{ color: primaryColor }}>
                 Component Preview
               </h2>
               <p className="text-xs mb-4" style={{ color: secondaryColor }}>
@@ -567,7 +567,7 @@ export default function PMDColorConverter() {
               
               {/* Compact Navigation */}
               <div className="mb-4">
-                <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Navigation</div>
+                <div className="text-sm font-semibold mb-2 font-fredoka-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Navigation</div>
                 <div 
                   className="flex items-center gap-2 p-2 rounded"
                   style={{ 
@@ -620,7 +620,7 @@ export default function PMDColorConverter() {
               <div className="space-y-4">
                 {/* Form & Buttons */}
                 <div>
-                  <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Forms & Buttons</div>
+                  <div className="text-sm font-semibold mb-2 font-fredoka-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Forms & Buttons</div>
                   
                   <div className="space-y-2">
                     <input
@@ -666,7 +666,7 @@ export default function PMDColorConverter() {
                 
                 {/* Status & Alerts */}
                 <div>
-                  <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Status & Alerts</div>
+                  <div className="text-sm font-semibold mb-2 font-fredoka-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Status & Alerts</div>
                   
                   <div className="space-y-2">
                     <div 
@@ -678,7 +678,7 @@ export default function PMDColorConverter() {
                       }}
                     >
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }} />
-                      <span className="text-xs">Active</span>
+                      <span className="text-sm font-medium font-fredoka">Active</span>
                     </div>
                     
                     <div 
@@ -690,7 +690,7 @@ export default function PMDColorConverter() {
                       }}
                     >
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: auxColor }} />
-                      <span className="text-xs">Warning</span>
+                      <span className="text-sm font-medium font-fredoka">Warning</span>
                     </div>
                     
                     <div 
@@ -701,15 +701,15 @@ export default function PMDColorConverter() {
                         color: getThemeTextColor(accentColor + '14')
                       }}
                     >
-                      <div className="text-xs font-medium" style={{ color: accentColor }}>⚠️ Alert</div>
-                      <div className="text-xs" style={{ color: getThemeTextColor(accentColor + '14', secondaryColor) }}>System notification</div>
+                      <div className="text-sm font-semibold font-fredoka-semibold" style={{ color: accentColor }}>⚠️ Alert</div>
+                      <div className="text-sm font-medium font-fredoka" style={{ color: getThemeTextColor(accentColor + '14', secondaryColor) }}>System notification</div>
                     </div>
                   </div>
                 </div>
                 
                 {/* Card Example */}
                 <div>
-                  <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Card Component</div>
+                  <div className="text-sm font-semibold mb-2 font-fredoka-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Card Component</div>
                   
                   <div 
                     className="p-3 rounded-2xl"
@@ -719,8 +719,8 @@ export default function PMDColorConverter() {
                       color: getAutoInvertText(surfaceColor + '14', primaryColor, secondaryColor)
                     }}
                   >
-                    <div className="text-xs font-medium mb-1">Settings</div>
-                    <div className="text-xs mb-2">Configure preferences</div>
+                    <div className="text-sm font-semibold font-fredoka-semibold mb-1">Settings</div>
+                    <div className="text-sm font-medium font-fredoka mb-2">Configure preferences</div>
                     <div className="flex gap-2">
                       <button
                         className="px-2 py-1 rounded-2xl text-xs transition-opacity"
