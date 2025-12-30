@@ -85,7 +85,7 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
     
     if (brightness > 128) {
       // Light background - use dark text (8x color)
-      const darkRgb = oklchToRgb(0.24, 0.036, baseHue);
+      const darkRgb = oklchToRgb(0.2, 0.032, baseHue);
       return rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
     } else {
       // Dark background - use light text (88x color)
@@ -166,7 +166,7 @@ export default function PMDColorConverter() {
     
     if (brightness > 128) {
       // Light background - use dark text (8x color)
-      const darkRgb = oklchToRgb(0.24, 0.036, effectiveBaseHue);
+      const darkRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
       return rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
     } else {
       // Dark background - use light text (88x color)
@@ -216,7 +216,7 @@ export default function PMDColorConverter() {
     
     if (brightness > 128) {
       // Light background - use dark text (8x color)
-      const darkRgb = oklchToRgb(0.24, 0.036, effectiveBaseHue);
+      const darkRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
       const darkHex = rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
       return darkText || darkHex;
     } else {
@@ -236,7 +236,7 @@ export default function PMDColorConverter() {
     
     if (brightness > 128) {
       // Light accent background - use dark text (8x color)
-      const darkRgb = oklchToRgb(0.24, 0.036, effectiveBaseHue);
+      const darkRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
       return rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
     } else {
       // Dark accent background - use light text (88x color)
@@ -280,12 +280,12 @@ export default function PMDColorConverter() {
     { label: '80x (Secondary)', l: 0.8, c: 0.1, h: effectiveBaseHue, opacities: [100, 48, 12, 8] },
     { label: '80x+6 (SecondaryAux)', l: 0.8, c: 0.1, h: effectiveAuxOffset, opacities: [100, 48, 12, 8] },
     { label: '76x (Accent)', l: 0.76, c: 0.12, h: effectiveBaseHue, opacities: [100, 80] },
-    { label: '8x (Base)', l: 0.24, c: 0.036, h: effectiveBaseHue, opacities: [100, 80, 64, 40] },
+    { label: '8x (Base)', l: 0.2, c: 0.032, h: effectiveBaseHue, opacities: [100, 80, 64, 40] },
     { label: '0x (Black)', l: 0, c: 0, h: 0, opacities: [100, 80, 64, 40] },
   ];
   
   // PMD color variables
-  const baseRgb = oklchToRgb(0.24, 0.036, effectiveBaseHue);
+  const baseRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
   const surfaceRgb = oklchToRgb(0.8, 0.1, effectiveBaseHue);
   const primaryRgb = oklchToRgb(0.88, 0.056, effectiveBaseHue);
   const secondaryRgb = oklchToRgb(0.8, 0.1, effectiveBaseHue);

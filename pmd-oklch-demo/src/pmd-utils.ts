@@ -226,7 +226,7 @@ export const PMD_COLORS = {
   '80x': { l: 0.8, c: 0.1, h: 0, aux: false },
   '80x+6': { l: 0.8, c: 0.1, h: 0, aux: true },
   '76x': { l: 0.76, c: 0.12, h: 0, aux: false },
-  '8x': { l: 0.24, c: 0.036, h: 0, aux: false },
+  '8x': { l: 0.2, c: 0.032, h: 0, aux: false },
   black: { l: 0, c: 0, h: 0, aux: false }
 } as const;
 
