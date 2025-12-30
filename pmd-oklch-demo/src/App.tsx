@@ -325,7 +325,7 @@ export default function PMDColorConverter() {
                 }}
                 placeholder="0-360"
               />
-              <div className="text-xs mt-1" style={{ color: accentColor }}>0-360 degrees</div>
+              <div className="text-sm mt-1 font-fredoka" style={{ color: getThemeTextColor(baseColor + 'A6', accentColor) }}>0-360 degrees</div>
             </div>
             
             <div className="flex-1">
@@ -353,7 +353,7 @@ export default function PMDColorConverter() {
                 }}
                 placeholder="0-360"
               />
-              <div className="text-xs mt-1 font-nerd" style={{ color: getThemeTextColor(baseColor + 'A6', accentColor) }}>0-360 degrees</div>
+              <div className="text-sm mt-1 font-fredoka" style={{ color: getThemeTextColor(baseColor + 'A6', accentColor) }}>0-360 degrees</div>
             </div>
           </div>
           
