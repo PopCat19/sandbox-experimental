@@ -579,13 +579,13 @@ export default function PMDColorConverter() {
                   <div className="text-sm font-bold font-fredoka" style={{ color: primaryColor }}>PMD</div>
                   <div className="flex-1" />
                   <button 
-                    className="px-2 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
+                    className="px-3 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: primaryColor,
                       color: getContrastColor(primaryColor),
                       border: `2px solid ${primaryColor}`,
-                      minWidth: '48px',
-                      height: '24px',
+                      minWidth: '56px',
+                      height: '28px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -596,13 +596,13 @@ export default function PMDColorConverter() {
                     Home
                   </button>
                   <button 
-                    className="px-2 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
+                    className="px-3 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: 'transparent',
-                      color: getContrastColor(baseColor),
-                      border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
-                      minWidth: '48px',
-                      height: '24px',
+                      color: primaryColor,
+                      border: `2px solid ${primaryColor}3D`,
+                      minWidth: '56px',
+                      height: '28px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
