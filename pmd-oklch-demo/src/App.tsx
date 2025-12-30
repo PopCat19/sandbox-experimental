@@ -76,12 +76,21 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
   const hoverRgb = oklchToRgb(0.8, 0.1, baseHue);
   const hoverHex = rgbToHex(hoverRgb[0], hoverRgb[1], hoverRgb[2]);
   
-  // Use effective baseHue for display
-  const effectiveBaseHue = baseHue;
+  // Better text colors for visibility
+  const getContrastColor = (hexColor: string) => {
+    // Simple contrast calculation - use white for dark colors, dark for light colors
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#FFFFFF';
+  };
+  
+  const swatchTextColor = getContrastColor(hex);
   
   return (
     <div 
-      className="flex items-center gap-3 p-2 rounded transition-colors"
+      className="flex items-center gap-2 p-2 rounded transition-colors"
       style={{
         '--hover-bg': hoverHex + '14'
       } as React.CSSProperties}
@@ -89,30 +98,37 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
     >
       <div 
-        className="w-16 h-16 rounded flex-shrink-0"
+        className="w-12 h-12 rounded flex-shrink-0 relative"
         style={{ 
           backgroundColor: hex,
           opacity: opacity / 100,
           border: `2px solid ${primaryHex}3D`
         }}
-      />
+      >
+        <div 
+          className="absolute inset-0 flex items-center justify-center text-xs font-mono"
+          style={{ color: swatchTextColor }}
+        >
+          {Math.round(opacity)}%
+        </div>
+      </div>
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm" style={{ color: primaryHex }}>{label}</div>
-        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveBaseHue)) }}>
+        <div className="font-medium text-xs" style={{ color: primaryHex }}>{label}</div>
+        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.6, 0.08, baseHue)) }}>
           oklch({l} {c.toFixed(3)} {h})
         </div>
-        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.72, 0.12, effectiveBaseHue)) }}>{hexWithAlpha}</div>
+        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.5, 0.06, baseHue)) }}>{hexWithAlpha}</div>
       </div>
       <button
         onClick={handleCopy}
-        className="p-2 rounded transition-colors"
+        className="p-1 rounded transition-colors"
         style={{
-          color: rgbToHex(...oklchToRgb(0.72, 0.12, effectiveBaseHue))
+          color: rgbToHex(...oklchToRgb(0.5, 0.06, baseHue))
         }}
         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverHex + '14'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
-        {copied ? <Check className="w-4 h-4" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveBaseHue + 90)) }} /> : <Copy className="w-4 h-4" />}
+        {copied ? <Check className="w-3 h-3" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, baseHue + 90)) }} /> : <Copy className="w-3 h-3" />}
       </button>
     </div>
   );
@@ -185,10 +201,11 @@ export default function PMDColorConverter() {
   
   return (
     <div 
-      className="min-h-screen p-8"
+      className="min-h-screen p-4"
       style={{ backgroundColor: baseColor }}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
         <div 
           className="rounded-lg p-6 mb-6"
           style={{ 
@@ -200,11 +217,11 @@ export default function PMDColorConverter() {
           <h1 className="text-2xl font-bold mb-2" style={{ color: primaryColor }}>
             PMD OKLCH Color Converter
           </h1>
-          <p className="text-sm mb-6" style={{ color: secondaryColor }}>
+          <p className="text-sm mb-4" style={{ color: secondaryColor }}>
             Visualize your Project Minimalist Design palette with OKLCH values
           </p>
           
-          <div className="flex gap-6 mb-6">
+          <div className="flex gap-4 mb-4">
             <div className="flex-1">
               <label className="block text-sm font-medium mb-2" style={{ color: primaryColor }}>
                 Base Hue (degrees)
@@ -230,7 +247,7 @@ export default function PMDColorConverter() {
                 }}
                 placeholder="0-360"
               />
-              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • 0-360 degrees</div>
+              <div className="text-xs mt-1" style={{ color: accentColor }}>0-360 degrees</div>
             </div>
             
             <div className="flex-1">
@@ -258,323 +275,229 @@ export default function PMDColorConverter() {
                 }}
                 placeholder="0-360"
               />
-              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • 0-360 degrees</div>
+              <div className="text-xs mt-1" style={{ color: accentColor }}>0-360 degrees</div>
             </div>
           </div>
           
           {/* Hue Offset Toggle */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={toggleHueOffset}
-                className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleHueOffset}
+              className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+              style={{
+                backgroundColor: hueOffsetEnabled ? accentColor : surfaceColor + '3D'
+              }}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                  hueOffsetEnabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
                 style={{
-                  backgroundColor: hueOffsetEnabled ? accentColor : surfaceColor + '3D'
+                  backgroundColor: hueOffsetEnabled ? primaryColor : accentColor
                 }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
-                    hueOffsetEnabled ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                  style={{
-                    backgroundColor: hueOffsetEnabled ? primaryColor : accentColor
-                  }}
-                />
-              </button>
-              <div>
-                <div className="text-sm font-medium" style={{ color: primaryColor }}>
-                  +30° Hue Offset {hueOffsetEnabled ? 'ON' : 'OFF'}
-                </div>
-                <div className="text-xs" style={{ color: secondaryColor }}>
-                  Automatically shift all colors by +30° including aux
-                </div>
+              />
+            </button>
+            <div>
+              <div className="text-sm font-medium" style={{ color: primaryColor }}>
+                +30° Hue Offset {hueOffsetEnabled ? 'ON' : 'OFF'}
+              </div>
+              <div className="text-xs" style={{ color: secondaryColor }}>
+                Automatically shift all colors by +30° including aux
               </div>
             </div>
             {hueOffsetEnabled && (
-              <div className="mt-2 text-xs p-2 rounded" style={{ backgroundColor: accentColor + '14', color: accentColor }}>
+              <div className="ml-auto text-xs p-2 rounded" style={{ backgroundColor: accentColor + '14', color: accentColor }}>
                 Base: {baseHue}° → {effectiveBaseHue}° • Aux: {effectiveAuxOffset}°
               </div>
             )}
           </div>
         </div>
         
-        <div 
-          className="rounded-lg p-6 mb-6"
-          style={{ 
-            backgroundColor: baseColor + 'A6',
-            backdropFilter: 'blur(24px)',
-            border: `2px solid ${primaryColor}3D`
-          }}
-        >
-          <h2 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
-            Color Usage Demo
-          </h2>
-          <p className="text-sm mb-4" style={{ color: secondaryColor }}>
-            Primary (88x) for main elements • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) for urgency • Accent (72x) for actions
-            {hueOffsetEnabled && ' • +30° offset applied'}
-          </p>
-          
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Primary State</div>
-              
-              <div 
-                className="p-3 rounded"
-                style={{ 
-                  backgroundColor: surfaceColor + '14',
-                  border: `2px solid ${primaryColor}3D`
-                }}
-              >
-                <div className="text-sm font-medium" style={{ color: primaryColor }}>
-                  Temperature
-                </div>
-                <div className="text-xl font-bold" style={{ color: primaryColor }}>
-                  72°F
-                </div>
-              </div>
-              
-              <div 
-                className="p-3 rounded"
-                style={{ 
-                  backgroundColor: surfaceColor + '14',
-                  border: `2px solid ${primaryColor}3D`
-                }}
-              >
-                <div className="text-sm" style={{ color: secondaryColor }}>
-                  System status
-                </div>
-                <div className="text-sm font-medium" style={{ color: primaryColor }}>
-                  Active
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="text-xs font-medium mb-2" style={{ color: auxColor }}>Aux/Urgent State</div>
-              
-              <div 
-                className="p-3 rounded"
-                style={{ 
-                  backgroundColor: auxColor + '14',
-                  border: `2px solid ${auxColor}3D`
-                }}
-              >
-                <div className="text-sm font-medium" style={{ color: auxColor }}>
-                  Temperature
-                </div>
-                <div className="text-xl font-bold" style={{ color: auxColor }}>
-                  95°F
-                </div>
-              </div>
-              
-              <div 
-                className="p-3 rounded"
-                style={{ 
-                  backgroundColor: auxColor + '14',
-                  border: `2px solid ${auxColor}3D`
-                }}
-              >
-                <div className="text-sm" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveAuxOffset)) }}>
-                  System status
-                </div>
-                <div className="text-sm font-medium" style={{ color: auxColor }}>
-                  Warning
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="text-xs font-medium mb-2" style={{ color: accentColor }}>Accent/Action</div>
-              
-              <button
-                className="w-full p-3 rounded transition-opacity"
-                style={{ 
-                  backgroundColor: accentColor + 'CC',
-                  border: `2px solid ${accentColor}`,
-                  color: primaryColor,
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
-                onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
-              >
-                <div className="text-sm font-medium">
-                  Delete File
-                </div>
-              </button>
-              
-              <div 
-                className="p-3 rounded"
-                style={{ 
-                  backgroundColor: surfaceColor + '14',
-                  border: `2px solid ${primaryColor}3D`
-                }}
-              >
-                <div className="text-sm" style={{ color: secondaryColor }}>
-                  Learn more at{' '}
-                  <span style={{ color: accentColor, cursor: 'pointer' }}>
-                    docs.example.com
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div 
-          className="rounded-lg p-6"
-          style={{ 
-            backgroundColor: baseColor + 'A6',
-            backdropFilter: 'blur(24px)',
-            border: `2px solid ${primaryColor}3D`
-          }}
-        >
-          <h2 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
-            Color Palette
-          </h2>
-          <div className="space-y-4">
-            {pmdColors.map((color, idx) => (
-              <div key={idx}>
-                <ColorSwatch
-                  label={color.label}
-                  l={color.l}
-                  c={color.c}
-                  h={color.h}
-                  opacity={100}
-                  baseHue={baseHue}
-                  primary={true}
-                />
-                {color.opacities.length > 1 && (
-                  <div className="ml-20 mt-2 space-y-2">
-                    {color.opacities.slice(1).map((opacity) => (
-                      <ColorSwatch
-                        key={opacity}
-                        label={`${opacity}%`}
-                        l={color.l}
-                        c={color.c}
-                        h={color.h}
-                        opacity={opacity}
-                        baseHue={baseHue}
-                        primary={false}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* Full Component Preview */}
-        <div 
-          className="rounded-lg p-6 mt-6"
-          style={{ 
-            backgroundColor: baseColor + 'A6',
-            backdropFilter: 'blur(24px)',
-            border: `2px solid ${primaryColor}3D`
-          }}
-        >
-          <h2 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
-            Full Component Preview
-          </h2>
-          <p className="text-sm mb-6" style={{ color: secondaryColor }}>
-            See how PMD colors work in real UI components
-          </p>
-          
-          {/* Navigation */}
-          <div className="mb-6">
-            <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Navigation</div>
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Color Usage Demo */}
             <div 
-              className="flex items-center gap-4 p-3 rounded"
-              style={{ backgroundColor: surfaceColor + '14', border: `2px solid ${primaryColor}24` }}
+              className="rounded-lg p-4"
+              style={{ 
+                backgroundColor: baseColor + 'A6',
+                backdropFilter: 'blur(24px)',
+                border: `2px solid ${primaryColor}3D`
+              }}
             >
-              <div className="font-medium" style={{ color: primaryColor }}>PMD Design</div>
-              <div className="flex-1" />
-              <button 
-                className="px-3 py-1 rounded text-sm font-medium transition-opacity"
-                style={{ 
-                  backgroundColor: primaryColor,
-                  color: 'white',
-                  border: `2px solid ${primaryColor}`
-                }}
-                onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
-                onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
-              >
-                Home
-              </button>
-              <button 
-                className="px-3 py-1 rounded text-sm font-medium transition-opacity"
-                style={{ 
-                  backgroundColor: 'transparent',
-                  color: secondaryColor,
-                  border: `2px solid ${primaryColor}24`
-                }}
-                onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
-                onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
-              >
-                Components
-              </button>
-              <button 
-                className="px-3 py-1 rounded text-sm font-medium transition-opacity"
-                style={{ 
-                  backgroundColor: 'transparent',
-                  color: accentColor,
-                  border: `2px solid ${accentColor}`
-                }}
-                onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
-                onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
-              >
-                Docs
-              </button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {/* Form Components */}
-              <div>
-                <div className="text-xs font-medium mb-3" style={{ color: primaryColor }}>Form Components</div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs mb-1" style={{ color: primaryColor }}>Email</label>
-                    <input
-                      type="email"
-                      className="w-full px-3 py-2 rounded focus:outline-none"
-                      style={{
-                        backgroundColor: surfaceColor + '14',
-                        color: primaryColor,
-                        border: `2px solid ${primaryColor}24`
-                      }}
-                      placeholder="user@example.com"
-                    />
+              <h2 className="text-lg font-semibold mb-3" style={{ color: primaryColor }}>
+                Color Usage Demo
+              </h2>
+              <p className="text-xs mb-3" style={{ color: secondaryColor }}>
+                Primary (88x) • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) • Accent (72x)
+                {hueOffsetEnabled && ' • +30° offset'}
+              </p>
+              
+              <div className="grid grid-cols-1 gap-3">
+                <div className="space-y-2">
+                  <div className="text-xs font-medium" style={{ color: primaryColor }}>Primary State</div>
+                  
+                  <div 
+                    className="p-2 rounded"
+                    style={{ 
+                      backgroundColor: surfaceColor + '14',
+                      border: `2px solid ${primaryColor}3D`
+                    }}
+                  >
+                    <div className="text-xs font-medium" style={{ color: primaryColor }}>Temperature</div>
+                    <div className="text-lg font-bold" style={{ color: primaryColor }}>72°F</div>
                   </div>
                   
-                  <div>
-                    <label className="block text-xs mb-1" style={{ color: primaryColor }}>Status</label>
-                    <select
-                      className="w-full px-3 py-2 rounded focus:outline-none"
-                      style={{
-                        backgroundColor: surfaceColor + '14',
-                        color: primaryColor,
-                        border: `2px solid ${primaryColor}24`
-                      }}
-                    >
-                      <option style={{ backgroundColor: surfaceColor, color: primaryColor }}>Active</option>
-                      <option style={{ backgroundColor: surfaceColor, color: primaryColor }}>Pending</option>
-                      <option style={{ backgroundColor: surfaceColor, color: primaryColor }}>Disabled</option>
-                    </select>
+                  <div 
+                    className="p-2 rounded"
+                    style={{ 
+                      backgroundColor: surfaceColor + '14',
+                      border: `2px solid ${primaryColor}3D`
+                    }}
+                  >
+                    <div className="text-xs" style={{ color: secondaryColor }}>System status</div>
+                    <div className="text-xs font-medium" style={{ color: primaryColor }}>Active</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="text-xs font-medium" style={{ color: auxColor }}>Aux/Urgent State</div>
+                  
+                  <div 
+                    className="p-2 rounded"
+                    style={{ 
+                      backgroundColor: auxColor + '14',
+                      border: `2px solid ${auxColor}3D`
+                    }}
+                  >
+                    <div className="text-xs font-medium" style={{ color: auxColor }}>Temperature</div>
+                    <div className="text-lg font-bold" style={{ color: auxColor }}>95°F</div>
+                  </div>
+                  
+                  <div 
+                    className="p-2 rounded"
+                    style={{ 
+                      backgroundColor: auxColor + '14',
+                      border: `2px solid ${auxColor}3D`
+                    }}
+                  >
+                    <div className="text-xs" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveAuxOffset)) }}>
+                      System status
+                    </div>
+                    <div className="text-xs font-medium" style={{ color: auxColor }}>Warning</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="text-xs font-medium" style={{ color: accentColor }}>Accent/Action</div>
+                  
+                  <button
+                    className="w-full p-2 rounded transition-opacity"
+                    style={{ 
+                      backgroundColor: accentColor + 'CC',
+                      border: `2px solid ${accentColor}`,
+                      color: primaryColor,
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
+                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+                  >
+                    <div className="text-xs font-medium">Delete File</div>
+                  </button>
+                  
+                  <div 
+                    className="p-2 rounded"
+                    style={{ 
+                      backgroundColor: surfaceColor + '14',
+                      border: `2px solid ${primaryColor}3D`
+                    }}
+                  >
+                    <div className="text-xs" style={{ color: secondaryColor }}>
+                      Learn more at{' '}
+                      <span style={{ color: accentColor, cursor: 'pointer' }}>docs.example.com</span>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            {/* Compact Color Palette */}
+            <div 
+              className="rounded-lg p-4"
+              style={{ 
+                backgroundColor: baseColor + 'A6',
+                backdropFilter: 'blur(24px)',
+                border: `2px solid ${primaryColor}3D`
+              }}
+            >
+              <h2 className="text-lg font-semibold mb-3" style={{ color: primaryColor }}>
+                Color Palette
+              </h2>
+              <div className="space-y-3">
+                {pmdColors.map((color, idx) => (
+                  <div key={idx}>
+                    <ColorSwatch
+                      label={color.label}
+                      l={color.l}
+                      c={color.c}
+                      h={color.h}
+                      opacity={100}
+                      baseHue={baseHue}
+                      primary={true}
+                    />
+                    {color.opacities.length > 1 && (
+                      <div className="ml-20 mt-2 space-y-1">
+                        {color.opacities.slice(1).map((opacity) => (
+                          <ColorSwatch
+                            key={opacity}
+                            label={`${opacity}%`}
+                            l={color.l}
+                            c={color.c}
+                            h={color.h}
+                            opacity={opacity}
+                            baseHue={baseHue}
+                            primary={false}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Column */}
+          <div className="space-y-6">
+        
+            {/* Full Component Preview */}
+            <div 
+              className="rounded-lg p-4"
+              style={{ 
+                backgroundColor: baseColor + 'A6',
+                backdropFilter: 'blur(24px)',
+                border: `2px solid ${primaryColor}3D`
+              }}
+            >
+              <h2 className="text-lg font-semibold mb-3" style={{ color: primaryColor }}>
+                Component Preview
+              </h2>
+              <p className="text-xs mb-4" style={{ color: secondaryColor }}>
+                PMD colors in real UI components
+              </p>
               
-              {/* Button Variants */}
-              <div>
-                <div className="text-xs font-medium mb-3" style={{ color: primaryColor }}>Button Variants</div>
-                
-                <div className="space-y-2">
-                  <button
-                    className="w-full p-3 rounded font-medium transition-opacity"
+              {/* Compact Navigation */}
+              <div className="mb-4">
+                <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Navigation</div>
+                <div 
+                  className="flex items-center gap-2 p-2 rounded"
+                  style={{ backgroundColor: surfaceColor + '14', border: `2px solid ${primaryColor}24` }}
+                >
+                  <div className="text-xs font-medium" style={{ color: primaryColor }}>PMD</div>
+                  <div className="flex-1" />
+                  <button 
+                    className="px-2 py-1 rounded text-xs font-medium transition-opacity"
                     style={{ 
                       backgroundColor: primaryColor,
                       color: 'white',
@@ -583,167 +506,143 @@ export default function PMDColorConverter() {
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
                     onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
                   >
-                    Primary Action
+                    Home
                   </button>
-                  
-                  <button
-                    className="w-full p-3 rounded font-medium transition-opacity"
-                    style={{ 
-                      backgroundColor: auxColor,
-                      color: 'white',
-                      border: `2px solid ${auxColor}`
-                    }}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
-                  >
-                    Urgent Action
-                  </button>
-                  
-                  <button
-                    className="w-full p-3 rounded font-medium transition-opacity"
-                    style={{ 
-                      backgroundColor: accentColor,
-                      color: 'white',
-                      border: `2px solid ${accentColor}`
-                    }}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
-                  >
-                    Accent Action
-                  </button>
-                  
-                  <button
-                    className="w-full p-3 rounded font-medium transition-opacity"
+                  <button 
+                    className="px-2 py-1 rounded text-xs font-medium transition-opacity"
                     style={{ 
                       backgroundColor: 'transparent',
-                      color: primaryColor,
-                      border: `2px solid ${primaryColor}`
+                      color: secondaryColor,
+                      border: `2px solid ${primaryColor}24`
                     }}
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
                     onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
                   >
-                    Secondary
+                    Docs
                   </button>
                 </div>
               </div>
-            </div>
-            
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Card Components */}
-              <div>
-                <div className="text-xs font-medium mb-3" style={{ color: primaryColor }}>Card Components</div>
-                
-                <div 
-                  className="p-4 rounded"
-                  style={{ 
-                    backgroundColor: surfaceColor + '14',
-                    border: `2px solid ${primaryColor}24`
-                  }}
-                >
-                  <div className="font-medium mb-2" style={{ color: primaryColor }}>Settings Panel</div>
-                  <div className="text-sm mb-3" style={{ color: secondaryColor }}>
-                    Configure your application preferences and theme options.
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      className="px-3 py-1 rounded text-xs font-medium transition-opacity"
-                      style={{ 
-                        backgroundColor: primaryColor,
-                        color: 'white',
-                        border: `2px solid ${primaryColor}`
-                      }}
-                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
-                      onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
-                    >
-                      Save
-                    </button>
-                    <button
-                      className="px-3 py-1 rounded text-xs font-medium transition-opacity"
-                      style={{ 
-                        backgroundColor: 'transparent',
-                        color: secondaryColor,
+              
+              <div className="space-y-4">
+                {/* Form & Buttons */}
+                <div>
+                  <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Forms & Buttons</div>
+                  
+                  <div className="space-y-2">
+                    <input
+                      type="email"
+                      className="w-full px-2 py-1 rounded text-xs focus:outline-none"
+                      style={{
+                        backgroundColor: surfaceColor + '14',
+                        color: primaryColor,
                         border: `2px solid ${primaryColor}24`
                       }}
-                      onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
-                      onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
+                      placeholder="email@example.com"
+                    />
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        className="p-2 rounded text-xs font-medium transition-opacity"
+                        style={{ 
+                          backgroundColor: primaryColor,
+                          color: 'white',
+                          border: `2px solid ${primaryColor}`
+                        }}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
+                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+                      >
+                        Primary
+                      </button>
+                      
+                      <button
+                        className="p-2 rounded text-xs font-medium transition-opacity"
+                        style={{ 
+                          backgroundColor: auxColor,
+                          color: 'white',
+                          border: `2px solid ${auxColor}`
+                        }}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
+                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+                      >
+                        Urgent
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Status & Alerts */}
+                <div>
+                  <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Status & Alerts</div>
+                  
+                  <div className="space-y-2">
+                    <div 
+                      className="flex items-center gap-2 p-2 rounded"
+                      style={{ backgroundColor: primaryColor + '14', border: `2px solid ${primaryColor}24` }}
                     >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Status Indicators */}
-              <div>
-                <div className="text-xs font-medium mb-3" style={{ color: primaryColor }}>Status Indicators</div>
-                
-                <div className="space-y-2">
-                  <div 
-                    className="flex items-center gap-2 p-2 rounded"
-                    style={{ backgroundColor: primaryColor + '14', border: `2px solid ${primaryColor}24` }}
-                  >
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }} />
-                    <span className="text-xs" style={{ color: primaryColor }}>Active</span>
-                  </div>
-                  
-                  <div 
-                    className="flex items-center gap-2 p-2 rounded"
-                    style={{ backgroundColor: auxColor + '14', border: `2px solid ${auxColor}24` }}
-                  >
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: auxColor }} />
-                    <span className="text-xs" style={{ color: auxColor }}>Warning</span>
-                  </div>
-                  
-                  <div 
-                    className="flex items-center gap-2 p-2 rounded"
-                    style={{ backgroundColor: accentColor + '14', border: `2px solid ${accentColor}24` }}
-                  >
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: accentColor }} />
-                    <span className="text-xs" style={{ color: accentColor }}>Pending</span>
-                  </div>
-                  
-                  <div 
-                    className="flex items-center gap-2 p-2 rounded"
-                    style={{ backgroundColor: secondaryColor + '14', border: `2px solid ${primaryColor}24` }}
-                  >
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: secondaryColor }} />
-                    <span className="text-xs" style={{ color: secondaryColor }}>Inactive</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Alert Components */}
-              <div>
-                <div className="text-xs font-medium mb-3" style={{ color: primaryColor }}>Alert Components</div>
-                
-                <div 
-                  className="p-3 rounded"
-                  style={{ 
-                    backgroundColor: auxColor + '14',
-                    border: `2px solid ${auxColor}`
-                  }}
-                >
-                  <div className="font-medium text-sm mb-1" style={{ color: auxColor }}>
-                    ⚠️ System Alert
-                  </div>
-                  <div className="text-xs" style={{ color: auxColor }}>
-                    Your session will expire in 5 minutes.
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }} />
+                      <span className="text-xs" style={{ color: primaryColor }}>Active</span>
+                    </div>
+                    
+                    <div 
+                      className="flex items-center gap-2 p-2 rounded"
+                      style={{ backgroundColor: auxColor + '14', border: `2px solid ${auxColor}24` }}
+                    >
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: auxColor }} />
+                      <span className="text-xs" style={{ color: auxColor }}>Warning</span>
+                    </div>
+                    
+                    <div 
+                      className="p-2 rounded"
+                      style={{ 
+                        backgroundColor: accentColor + '14',
+                        border: `2px solid ${accentColor}`
+                      }}
+                    >
+                      <div className="text-xs font-medium" style={{ color: accentColor }}>⚠️ Alert</div>
+                      <div className="text-xs" style={{ color: accentColor }}>System notification</div>
+                    </div>
                   </div>
                 </div>
                 
-                <div 
-                  className="p-3 rounded mt-2"
-                  style={{ 
-                    backgroundColor: primaryColor + '14',
-                    border: `2px solid ${primaryColor}`
-                  }}
-                >
-                  <div className="font-medium text-sm mb-1" style={{ color: primaryColor }}>
-                    ℹ️ Information
-                  </div>
-                  <div className="text-xs" style={{ color: primaryColor }}>
-                    New features are available in settings.
+                {/* Card Example */}
+                <div>
+                  <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Card Component</div>
+                  
+                  <div 
+                    className="p-3 rounded"
+                    style={{ 
+                      backgroundColor: surfaceColor + '14',
+                      border: `2px solid ${primaryColor}24`
+                    }}
+                  >
+                    <div className="text-xs font-medium mb-1" style={{ color: primaryColor }}>Settings</div>
+                    <div className="text-xs mb-2" style={{ color: secondaryColor }}>Configure preferences</div>
+                    <div className="flex gap-2">
+                      <button
+                        className="px-2 py-1 rounded text-xs transition-opacity"
+                        style={{ 
+                          backgroundColor: primaryColor,
+                          color: 'white',
+                          border: `2px solid ${primaryColor}`
+                        }}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
+                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="px-2 py-1 rounded text-xs transition-opacity"
+                        style={{ 
+                          backgroundColor: 'transparent',
+                          color: secondaryColor,
+                          border: `2px solid ${primaryColor}24`
+                        }}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
+                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -751,7 +650,7 @@ export default function PMDColorConverter() {
           </div>
         </div>
         
-        <div className="mt-6 text-center text-sm" style={{ color: accentColor }}>
+        <div className="mt-4 text-center text-xs" style={{ color: accentColor }}>
           Click the copy icon to copy hex values to clipboard
         </div>
       </div>
