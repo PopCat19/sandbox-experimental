@@ -205,6 +205,24 @@ export default function PMDColorConverter() {
     }
   };
   
+  // Get inverted text color for accent backgrounds (on-accent)
+  const getOnAccentText = (accentBackgroundColor: string) => {
+    const r = parseInt(accentBackgroundColor.slice(1, 3), 16);
+    const g = parseInt(accentBackgroundColor.slice(3, 5), 16);
+    const b = parseInt(accentBackgroundColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    if (brightness > 128) {
+      // Light accent background - use dark text (8x color)
+      const darkRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
+      return rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
+    } else {
+      // Dark accent background - use light text (88x color)
+      const lightRgb = oklchToRgb(0.88, 0.056, effectiveBaseHue);
+      return rgbToHex(lightRgb[0], lightRgb[1], lightRgb[2]);
+    }
+  };
+  
   const commitHueChange = (value: string) => {
     const num = parseFloat(value);
     if (!isNaN(num)) {
@@ -366,7 +384,7 @@ export default function PMDColorConverter() {
               </div>
             </div>
             {hueOffsetEnabled && (
-              <div className="ml-auto text-xs p-2 rounded-2xl font-nerd" style={{ backgroundColor: accentColor + '14', color: getThemeTextColor(accentColor + '14', accentColor) }}>
+              <div className="ml-auto text-xs p-2 rounded-2xl font-nerd" style={{ backgroundColor: accentColor + '14', color: getOnAccentText(accentColor + '14') }}>
                 Base: {baseHue}° → {effectiveBaseHue}° • Aux: {effectiveAuxOffset}°
               </div>
             )}
@@ -455,9 +473,9 @@ export default function PMDColorConverter() {
                   <button
                     className="w-full p-2 rounded-2xl transition-opacity"
                     style={{ 
-                      backgroundColor: accentColor + 'CC',
+                      backgroundColor: accentColor + 'FF',
                       border: `2px solid ${accentColor}`,
-                      color: primaryColor,
+                      color: getOnAccentText(accentColor + 'FF'),
                       cursor: 'pointer'
                     }}
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
@@ -668,7 +686,7 @@ export default function PMDColorConverter() {
                       style={{ 
                         backgroundColor: accentColor + '14',
                         border: `2px solid ${accentColor}`,
-                        color: getAutoInvertText(accentColor + '14', accentColor, accentColor)
+                        color: getOnAccentText(accentColor + '14')
                       }}
                     >
                       <div className="text-xs font-medium">⚠️ Alert</div>
