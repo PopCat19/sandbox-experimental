@@ -1,0 +1,441 @@
+import { useState } from 'react';
+import { Copy, Check } from 'lucide-react';
+
+function oklchToRgb(l: number, c: number, h: number): [number, number, number] {
+  // Convert OKLCH to OKLAB
+  const hRad = (h * Math.PI) / 180;
+  const a = c * Math.cos(hRad);
+  const b = c * Math.sin(hRad);
+  
+  // OKLAB to linear RGB
+  const l_ = l + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = l - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = l - 0.0894841775 * a - 1.2914855480 * b;
+  
+  const l3 = l_ * l_ * l_;
+  const m3 = m_ * m_ * m_;
+  const s3 = s_ * s_ * s_;
+  
+  let r = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
+  let g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
+  let bl = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3;
+  
+  // Gamma correction
+  const gammaCorrect = (c: number) => {
+    const abs = Math.abs(c);
+    if (abs > 0.0031308) {
+      return Math.sign(c) * (1.055 * Math.pow(abs, 1/2.4) - 0.055);
+    }
+    return 12.92 * c;
+  };
+  
+  r = gammaCorrect(r);
+  g = gammaCorrect(g);
+  bl = gammaCorrect(bl);
+  
+  // Clamp to sRGB
+  r = Math.max(0, Math.min(1, r));
+  g = Math.max(0, Math.min(1, g));
+  bl = Math.max(0, Math.min(1, bl));
+  
+  return [
+    Math.round(r * 255),
+    Math.round(g * 255),
+    Math.round(bl * 255)
+  ];
+}
+
+function rgbToHex(r: number, g: number, b: number): string {
+  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+}
+
+interface ColorSwatchProps {
+  label: string;
+  l: number;
+  c: number;
+  h: number;
+  opacity?: number;
+  baseHue: number;
+  primary?: boolean;
+}
+
+function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: ColorSwatchProps) {
+  const [copied, setCopied] = useState(false);
+  const rgb = oklchToRgb(l, c, h);
+  const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+  const hexWithAlpha = opacity < 100 ? hex + Math.round(opacity * 2.55).toString(16).padStart(2, '0').toUpperCase() : hex;
+  
+  const handleCopy = () => {
+    navigator.clipboard.writeText(hexWithAlpha);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  
+  const primaryRgb = oklchToRgb(0.88, 0.056, baseHue);
+  const primaryHex = rgbToHex(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
+  const hoverRgb = oklchToRgb(0.8, 0.1, baseHue);
+  const hoverHex = rgbToHex(hoverRgb[0], hoverRgb[1], hoverRgb[2]);
+  
+  return (
+    <div 
+      className="flex items-center gap-3 p-2 rounded transition-colors"
+      style={{
+        '--hover-bg': hoverHex + '14'
+      } as React.CSSProperties}
+      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
+      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+    >
+      <div 
+        className="w-16 h-16 rounded flex-shrink-0"
+        style={{ 
+          backgroundColor: hex,
+          opacity: opacity / 100,
+          border: `2px solid ${primaryHex}3D`
+        }}
+      />
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-sm" style={{ color: primaryHex }}>{label}</div>
+        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, baseHue)) }}>
+          oklch({l} {c.toFixed(3)} {h})
+        </div>
+        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.72, 0.12, baseHue)) }}>{hexWithAlpha}</div>
+      </div>
+      <button
+        onClick={handleCopy}
+        className="p-2 rounded transition-colors"
+        style={{
+          color: rgbToHex(...oklchToRgb(0.72, 0.12, baseHue))
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverHex + '14'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+      >
+        {copied ? <Check className="w-4 h-4" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, baseHue + 90)) }} /> : <Copy className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+}
+
+export default function PMDColorConverter() {
+  const [baseHue, setBaseHue] = useState(345);
+  const [auxOffset, setAuxOffset] = useState(90);
+  const [baseHueInput, setBaseHueInput] = useState('345');
+  const [auxOffsetInput, setAuxOffsetInput] = useState('90');
+  
+  const commitHueChange = (value: string) => {
+    // Handle calculations like +15, -15
+    if (value.startsWith('+') || value.startsWith('-')) {
+      const delta = parseFloat(value);
+      if (!isNaN(delta)) {
+        const newHue = ((baseHue + delta) % 360 + 360) % 360;
+        setBaseHue(newHue);
+        setBaseHueInput(newHue.toString());
+      }
+    } else {
+      const num = parseFloat(value);
+      if (!isNaN(num)) {
+        const normalized = ((num % 360) + 360) % 360;
+        setBaseHue(normalized);
+        setBaseHueInput(normalized.toString());
+      } else if (value === '') {
+        setBaseHue(0);
+        setBaseHueInput('0');
+      }
+    }
+  };
+  
+  const commitAuxChange = (value: string) => {
+    // Handle calculations like +15, -15
+    if (value.startsWith('+') || value.startsWith('-')) {
+      const delta = parseFloat(value);
+      if (!isNaN(delta)) {
+        const newOffset = auxOffset + delta;
+        setAuxOffset(newOffset);
+        setAuxOffsetInput(newOffset.toString());
+      }
+    } else {
+      const num = parseFloat(value);
+      if (!isNaN(num)) {
+        setAuxOffset(num);
+        setAuxOffsetInput(num.toString());
+      } else if (value === '') {
+        setAuxOffset(0);
+        setAuxOffsetInput('0');
+      }
+    }
+  };
+  
+  const pmdColors = [
+    { label: '100x (White)', l: 1, c: 0, h: 0, opacities: [100, 32] },
+    { label: '96x (Selection)', l: 0.96, c: 0.016, h: baseHue, opacities: [100] },
+    { label: '88x (Primary)', l: 0.88, c: 0.056, h: baseHue, opacities: [100, 48, 24] },
+    { label: '88x+6 (PrimaryAux)', l: 0.88, c: 0.056, h: baseHue + auxOffset, opacities: [100, 24] },
+    { label: '80x (Secondary)', l: 0.8, c: 0.1, h: baseHue, opacities: [100, 48, 12, 8] },
+    { label: '80x+6 (SecondaryAux)', l: 0.8, c: 0.1, h: baseHue + auxOffset, opacities: [100, 48, 12, 8] },
+    { label: '72x (Accent)', l: 0.72, c: 0.12, h: baseHue, opacities: [100, 80] },
+    { label: '8x (Base)', l: 0.2, c: 0.032, h: baseHue, opacities: [100, 80, 64, 40] },
+    { label: '0x (Black)', l: 0, c: 0, h: 0, opacities: [100, 80, 64, 40] },
+  ];
+  
+  // PMD color variables
+  const baseRgb = oklchToRgb(0.2, 0.032, baseHue);
+  const surfaceRgb = oklchToRgb(0.8, 0.1, baseHue);
+  const primaryRgb = oklchToRgb(0.88, 0.056, baseHue);
+  const secondaryRgb = oklchToRgb(0.8, 0.1, baseHue);
+  const accentRgb = oklchToRgb(0.72, 0.12, baseHue);
+  const auxRgb = oklchToRgb(0.88, 0.056, baseHue + auxOffset);
+  
+  const baseColor = rgbToHex(baseRgb[0], baseRgb[1], baseRgb[2]);
+  const surfaceColor = rgbToHex(surfaceRgb[0], surfaceRgb[1], surfaceRgb[2]);
+  const primaryColor = rgbToHex(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
+  const secondaryColor = rgbToHex(secondaryRgb[0], secondaryRgb[1], secondaryRgb[2]);
+  const accentColor = rgbToHex(accentRgb[0], accentRgb[1], accentRgb[2]);
+  const auxColor = rgbToHex(auxRgb[0], auxRgb[1], auxRgb[2]);
+  
+  return (
+    <div 
+      className="min-h-screen p-8"
+      style={{ backgroundColor: baseColor }}
+    >
+      <div className="max-w-4xl mx-auto">
+        <div 
+          className="rounded-lg p-6 mb-6"
+          style={{ 
+            backgroundColor: baseColor + 'A6',
+            backdropFilter: 'blur(24px)',
+            border: `2px solid ${primaryColor}3D`
+          }}
+        >
+          <h1 className="text-2xl font-bold mb-2" style={{ color: primaryColor }}>
+            PMD OKLCH Color Converter
+          </h1>
+          <p className="text-sm mb-6" style={{ color: secondaryColor }}>
+            Visualize your Project Minimalist Design palette with OKLCH values
+          </p>
+          
+          <div className="flex gap-6 mb-6">
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-2" style={{ color: primaryColor }}>
+                Base Hue (degrees)
+              </label>
+              <input
+                type="text"
+                value={baseHueInput}
+                onChange={(e) => setBaseHueInput(e.target.value)}
+                onBlur={(e) => commitHueChange((e.target as HTMLInputElement).value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    commitHueChange((e.target as HTMLInputElement).value);
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+                className="w-full px-3 py-2 rounded focus:outline-none"
+                style={{
+                  backgroundColor: surfaceColor + '14',
+                  color: primaryColor,
+                  border: `2px solid ${primaryColor}3D`
+                }}
+                placeholder="0-360 or +/-value"
+              />
+              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • Try +15 or -30</div>
+            </div>
+            
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-2" style={{ color: primaryColor }}>
+                Aux Hue Offset (degrees)
+              </label>
+              <input
+                type="text"
+                value={auxOffsetInput}
+                onChange={(e) => setAuxOffsetInput(e.target.value)}
+                onBlur={(e) => commitAuxChange((e.target as HTMLInputElement).value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    commitAuxChange((e.target as HTMLInputElement).value);
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+                className="w-full px-3 py-2 rounded focus:outline-none"
+                style={{
+                  backgroundColor: surfaceColor + '14',
+                  color: primaryColor,
+                  border: `2px solid ${primaryColor}3D`
+                }}
+                placeholder="any number or +/-value"
+              />
+              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • Try +15 or -30</div>
+            </div>
+          </div>
+        </div>
+        
+        <div 
+          className="rounded-lg p-6 mb-6"
+          style={{ 
+            backgroundColor: baseColor + 'A6',
+            backdropFilter: 'blur(24px)',
+            border: `2px solid ${primaryColor}3D`
+          }}
+        >
+          <h2 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
+            Color Usage Demo
+          </h2>
+          <p className="text-sm mb-4" style={{ color: secondaryColor }}>
+            Primary (88x) for main elements • Aux (+{auxOffset}°) for urgency • Accent (72x) for actions
+          </p>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Primary State</div>
+              
+              <div 
+                className="p-3 rounded"
+                style={{ 
+                  backgroundColor: surfaceColor + '14',
+                  border: `2px solid ${primaryColor}3D`
+                }}
+              >
+                <div className="text-sm font-medium" style={{ color: primaryColor }}>
+                  Temperature
+                </div>
+                <div className="text-xl font-bold" style={{ color: primaryColor }}>
+                  72°F
+                </div>
+              </div>
+              
+              <div 
+                className="p-3 rounded"
+                style={{ 
+                  backgroundColor: surfaceColor + '14',
+                  border: `2px solid ${primaryColor}3D`
+                }}
+              >
+                <div className="text-sm" style={{ color: secondaryColor }}>
+                  System status
+                </div>
+                <div className="text-sm font-medium" style={{ color: primaryColor }}>
+                  Active
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-xs font-medium mb-2" style={{ color: auxColor }}>Aux/Urgent State</div>
+              
+              <div 
+                className="p-3 rounded"
+                style={{ 
+                  backgroundColor: auxColor + '14',
+                  border: `2px solid ${auxColor}3D`
+                }}
+              >
+                <div className="text-sm font-medium" style={{ color: auxColor }}>
+                  Temperature
+                </div>
+                <div className="text-xl font-bold" style={{ color: auxColor }}>
+                  95°F
+                </div>
+              </div>
+              
+              <div 
+                className="p-3 rounded"
+                style={{ 
+                  backgroundColor: auxColor + '14',
+                  border: `2px solid ${auxColor}3D`
+                }}
+              >
+                <div className="text-sm" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, baseHue + auxOffset)) }}>
+                  System status
+                </div>
+                <div className="text-sm font-medium" style={{ color: auxColor }}>
+                  Warning
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-xs font-medium mb-2" style={{ color: accentColor }}>Accent/Action</div>
+              
+              <button
+                className="w-full p-3 rounded transition-opacity"
+                style={{ 
+                  backgroundColor: accentColor + 'CC',
+                  border: `2px solid ${accentColor}`,
+                  color: primaryColor,
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
+                onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
+              >
+                <div className="text-sm font-medium">
+                  Delete File
+                </div>
+              </button>
+              
+              <div 
+                className="p-3 rounded"
+                style={{ 
+                  backgroundColor: surfaceColor + '14',
+                  border: `2px solid ${primaryColor}3D`
+                }}
+              >
+                <div className="text-sm" style={{ color: secondaryColor }}>
+                  Learn more at{' '}
+                  <span style={{ color: accentColor, cursor: 'pointer' }}>
+                    docs.example.com
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div 
+          className="rounded-lg p-6"
+          style={{ 
+            backgroundColor: baseColor + 'A6',
+            backdropFilter: 'blur(24px)',
+            border: `2px solid ${primaryColor}3D`
+          }}
+        >
+          <h2 className="text-lg font-semibold mb-4" style={{ color: primaryColor }}>
+            Color Palette
+          </h2>
+          <div className="space-y-4">
+            {pmdColors.map((color, idx) => (
+              <div key={idx}>
+                <ColorSwatch
+                  label={color.label}
+                  l={color.l}
+                  c={color.c}
+                  h={color.h}
+                  opacity={100}
+                  baseHue={baseHue}
+                  primary={true}
+                />
+                {color.opacities.length > 1 && (
+                  <div className="ml-20 mt-2 space-y-2">
+                    {color.opacities.slice(1).map((opacity) => (
+                      <ColorSwatch
+                        key={opacity}
+                        label={`${opacity}%`}
+                        l={color.l}
+                        c={color.c}
+                        h={color.h}
+                        opacity={opacity}
+                        baseHue={baseHue}
+                        primary={false}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="mt-6 text-center text-sm" style={{ color: accentColor }}>
+          Click the copy icon to copy hex values to clipboard
+        </div>
+      </div>
+    </div>
+  );
+}
