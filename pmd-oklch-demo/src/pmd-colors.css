@@ -1,0 +1,263 @@
+/* PMD Design System - Color Implementation with Hue Offset Toggle
+ * ===============================================================
+ * This CSS demonstrates how to implement the hue offset toggle
+ * in your PMD design system for production use.
+ */
+
+/* CSS Custom Properties for PMD Colors
+ * Default state: hue offset disabled
+ */
+:root {
+  /* Base hue variables */
+  --pmd-base-hue: 345deg;
+  --pmd-aux-offset: 90deg;
+  --pmd-hue-offset-enabled: false;
+  
+  /* Calculated effective hues */
+  --pmd-effective-base-hue: var(--pmd-base-hue);
+  --pmd-effective-aux-hue: calc(var(--pmd-base-hue) + var(--pmd-aux-offset));
+  
+  /* Primary Colors (88x) */
+  --pmd-primary: oklch(0.88 0.056 var(--pmd-effective-base-hue));
+  --pmd-primary-24: oklch(0.88 0.056 var(--pmd-effective-base-hue) / 24%);
+  --pmd-primary-48: oklch(0.88 0.056 var(--pmd-effective-base-hue) / 48%);
+  --pmd-primary-100: oklch(0.88 0.056 var(--pmd-effective-base-hue) / 100%);
+  
+  /* Primary Auxiliary Colors (88x+6) */
+  --pmd-primary-aux: oklch(0.88 0.056 var(--pmd-effective-aux-hue));
+  --pmd-primary-aux-24: oklch(0.88 0.056 var(--pmd-effective-aux-hue) / 24%);
+  --pmd-primary-aux-100: oklch(0.88 0.056 var(--pmd-effective-aux-hue) / 100%);
+  
+  /* Secondary Colors (80x) */
+  --pmd-secondary: oklch(0.8 0.1 var(--pmd-effective-base-hue));
+  --pmd-secondary-8: oklch(0.8 0.1 var(--pmd-effective-base-hue) / 8%);
+  --pmd-secondary-12: oklch(0.8 0.1 var(--pmd-effective-base-hue) / 12%);
+  --pmd-secondary-48: oklch(0.8 0.1 var(--pmd-effective-base-hue) / 48%);
+  --pmd-secondary-100: oklch(0.8 0.1 var(--pmd-effective-base-hue) / 100%);
+  
+  /* Secondary Auxiliary Colors (80x+6) */
+  --pmd-secondary-aux: oklch(0.8 0.1 var(--pmd-effective-aux-hue));
+  --pmd-secondary-aux-8: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 8%);
+  --pmd-secondary-aux-12: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 12%);
+  --pmd-secondary-aux-48: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 48%);
+  --pmd-secondary-aux-100: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 100%);
+  
+  /* Accent Colors (72x) */
+  --pmd-accent: oklch(0.72 0.12 var(--pmd-effective-base-hue));
+  --pmd-accent-80: oklch(0.72 0.12 var(--pmd-effective-base-hue) / 80%);
+  --pmd-accent-100: oklch(0.72 0.12 var(--pmd-effective-base-hue) / 100%);
+  
+  /* Base Colors (8x) */
+  --pmd-base: oklch(0.2 0.032 var(--pmd-effective-base-hue));
+  --pmd-base-40: oklch(0.2 0.032 var(--pmd-effective-base-hue) / 40%);
+  --pmd-base-64: oklch(0.2 0.032 var(--pmd-effective-base-hue) / 64%);
+  --pmd-base-80: oklch(0.2 0.032 var(--pmd-effective-base-hue) / 80%);
+  --pmd-base-100: oklch(0.2 0.032 var(--pmd-effective-base-hue) / 100%);
+  
+  /* Selection Colors (96x) */
+  --pmd-selection: oklch(0.96 0.016 var(--pmd-effective-base-hue));
+  --pmd-selection-100: oklch(0.96 0.016 var(--pmd-effective-base-hue) / 100%);
+  
+  /* Neutral Colors */
+  --pmd-white: oklch(1 0 0);
+  --pmd-white-32: oklch(1 0 0 / 32%);
+  --pmd-white-100: oklch(1 0 0 / 100%);
+  --pmd-black: oklch(0 0 0);
+  --pmd-black-40: oklch(0 0 0 / 40%);
+  --pmd-black-64: oklch(0 0 0 / 64%);
+  --pmd-black-80: oklch(0 0 0 / 80%);
+  --pmd-black-100: oklch(0 0 0 / 100%);
+}
+
+/* Hue offset enabled state */
+.pmd-hue-offset-enabled {
+  --pmd-hue-offset-enabled: true;
+  --pmd-effective-base-hue: calc(var(--pmd-base-hue) + 30deg);
+  --pmd-effective-aux-hue: calc(var(--pmd-base-hue) + var(--pmd-aux-offset) + 30deg);
+}
+
+/* JavaScript toggle for runtime control */
+.pmd-theme-dark {
+  /* Dark theme specific adjustments */
+  --pmd-base-hue: 15deg; /* Warmer base for dark mode */
+}
+
+.pmd-theme-warm {
+  /* Warm theme variant */
+  --pmd-base-hue: 25deg;
+}
+
+.pmd-theme-cool {
+  /* Cool theme variant */
+  --pmd-base-hue: 200deg;
+}
+
+/* Utility Classes for Common Patterns */
+.pmd-bg-primary { background-color: var(--pmd-primary); }
+.pmd-bg-primary-aux { background-color: var(--pmd-primary-aux); }
+.pmd-bg-secondary { background-color: var(--pmd-secondary); }
+.pmd-bg-secondary-aux { background-color: var(--pmd-secondary-aux); }
+.pmd-bg-accent { background-color: var(--pmd-accent); }
+.pmd-bg-base { background-color: var(--pmd-base); }
+.pmd-bg-surface { background-color: var(--pmd-secondary-8); }
+
+.pmd-text-primary { color: var(--pmd-primary); }
+.pmd-text-primary-aux { color: var(--pmd-primary-aux); }
+.pmd-text-secondary { color: var(--pmd-secondary); }
+.pmd-text-accent { color: var(--pmd-accent); }
+.pmd-text-base { color: var(--pmd-base); }
+
+.pmd-border-primary { border-color: var(--pmd-primary); }
+.pmd-border-primary-aux { border-color: var(--pmd-primary-aux); }
+.pmd-border-secondary { border-color: var(--pmd-secondary); }
+.pmd-border-accent { border-color: var(--pmd-accent); }
+
+/* Component Examples */
+.pmd-button-primary {
+  background-color: var(--pmd-primary);
+  color: var(--pmd-white);
+  border: 2px solid var(--pmd-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.pmd-button-primary:hover {
+  opacity: 0.8;
+}
+
+.pmd-button-secondary {
+  background-color: var(--pmd-secondary-8);
+  color: var(--pmd-primary);
+  border: 2px solid var(--pmd-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pmd-button-secondary:hover {
+  background-color: var(--pmd-secondary-12);
+}
+
+.pmd-button-danger {
+  background-color: var(--pmd-primary-aux);
+  color: var(--pmd-white);
+  border: 2px solid var(--pmd-primary-aux);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.pmd-surface {
+  background-color: var(--pmd-secondary-8);
+  backdrop-filter: blur(24px);
+  border: 2px solid var(--pmd-primary-24);
+  border-radius: 16px;
+}
+
+.pmd-card {
+  background-color: var(--pmd-secondary-8);
+  border: 2px solid var(--pmd-primary-24);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 24px var(--pmd-base-40);
+}
+
+.pmd-modal-backdrop {
+  background-color: var(--pmd-base-80);
+  backdrop-filter: blur(24px);
+}
+
+.pmd-urgent {
+  background-color: var(--pmd-primary-aux-24);
+  border: 2px solid var(--pmd-primary-aux);
+  color: var(--pmd-primary-aux);
+}
+
+/* JavaScript Integration Example */
+/*
+// Toggle hue offset programmatically
+function toggleHueOffset() {
+  document.documentElement.classList.toggle('pmd-hue-offset-enabled');
+}
+
+// Check if hue offset is enabled
+function isHueOffsetEnabled() {
+  return document.documentElement.classList.contains('pmd-hue-offset-enabled');
+}
+
+// Set base hue dynamically
+function setBaseHue(degrees) {
+  document.documentElement.style.setProperty('--pmd-base-hue', `${degrees}deg`);
+}
+
+// Set aux offset dynamically
+function setAuxOffset(degrees) {
+  document.documentElement.style.setProperty('--pmd-aux-offset', `${degrees}deg`);
+}
+*/
+
+/* CSS-in-JS Example (for React, etc.)
+const pmdStyles = {
+  primary: {
+    backgroundColor: 'var(--pmd-primary)',
+    color: 'var(--pmd-white)',
+    border: '2px solid var(--pmd-primary)'
+  },
+  secondary: {
+    backgroundColor: 'var(--pmd-secondary-8)',
+    color: 'var(--pmd-primary)',
+    border: '2px solid var(--pmd-primary)'
+  },
+  accent: {
+    backgroundColor: 'var(--pmd-accent)',
+    color: 'var(--pmd-primary)',
+    border: '2px solid var(--pmd-accent)'
+  },
+  urgent: {
+    backgroundColor: 'var(--pmd-primary-aux-24)',
+    color: 'var(--pmd-primary-aux)',
+    border: '2px solid var(--pmd-primary-aux)'
+  }
+};
+*/
+
+/* Tailwind CSS Integration
+ * Add this to your tailwind.config.js
+ */
+/*
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        pmd: {
+          primary: 'var(--pmd-primary)',
+          'primary-aux': 'var(--pmd-primary-aux)',
+          secondary: 'var(--pmd-secondary)',
+          'secondary-aux': 'var(--pmd-secondary-aux)',
+          accent: 'var(--pmd-accent)',
+          base: 'var(--pmd-base)',
+          selection: 'var(--pmd-selection)',
+          white: 'var(--pmd-white)',
+          black: 'var(--pmd-black)',
+        },
+        opacity: {
+          'pmd-8': 'var(--pmd-secondary-8)',
+          'pmd-12': 'var(--pmd-secondary-12)',
+          'pmd-24': 'var(--pmd-primary-24)',
+          'pmd-40': 'var(--pmd-base-40)',
+          'pmd-48': 'var(--pmd-secondary-48)',
+          'pmd-64': 'var(--pmd-base-64)',
+          'pmd-80': 'var(--pmd-base-80)',
+        }
+      }
+    }
+  }
+}
+*/

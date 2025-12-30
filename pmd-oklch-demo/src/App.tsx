@@ -76,6 +76,9 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
   const hoverRgb = oklchToRgb(0.8, 0.1, baseHue);
   const hoverHex = rgbToHex(hoverRgb[0], hoverRgb[1], hoverRgb[2]);
   
+  // Use effective baseHue for display
+  const effectiveBaseHue = baseHue;
+  
   return (
     <div 
       className="flex items-center gap-3 p-2 rounded transition-colors"
@@ -95,21 +98,21 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
       />
       <div className="flex-1 min-w-0">
         <div className="font-medium text-sm" style={{ color: primaryHex }}>{label}</div>
-        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, baseHue)) }}>
+        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveBaseHue)) }}>
           oklch({l} {c.toFixed(3)} {h})
         </div>
-        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.72, 0.12, baseHue)) }}>{hexWithAlpha}</div>
+        <div className="text-xs font-mono" style={{ color: rgbToHex(...oklchToRgb(0.72, 0.12, effectiveBaseHue)) }}>{hexWithAlpha}</div>
       </div>
       <button
         onClick={handleCopy}
         className="p-2 rounded transition-colors"
         style={{
-          color: rgbToHex(...oklchToRgb(0.72, 0.12, baseHue))
+          color: rgbToHex(...oklchToRgb(0.72, 0.12, effectiveBaseHue))
         }}
         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverHex + '14'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
-        {copied ? <Check className="w-4 h-4" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, baseHue + 90)) }} /> : <Copy className="w-4 h-4" />}
+        {copied ? <Check className="w-4 h-4" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveBaseHue + 90)) }} /> : <Copy className="w-4 h-4" />}
       </button>
     </div>
   );
@@ -120,6 +123,11 @@ export default function PMDColorConverter() {
   const [auxOffset, setAuxOffset] = useState(90);
   const [baseHueInput, setBaseHueInput] = useState('345');
   const [auxOffsetInput, setAuxOffsetInput] = useState('90');
+  const [hueOffsetEnabled, setHueOffsetEnabled] = useState(false);
+  
+  // Apply +30deg offset when enabled
+  const effectiveBaseHue = hueOffsetEnabled ? (baseHue + 30) % 360 : baseHue;
+  const effectiveAuxOffset = hueOffsetEnabled ? (baseHue + auxOffset + 30) % 360 : (baseHue + auxOffset) % 360;
   
   const commitHueChange = (value: string) => {
     // Handle calculations like +15, -15
@@ -141,6 +149,10 @@ export default function PMDColorConverter() {
         setBaseHueInput('0');
       }
     }
+  };
+  
+  const toggleHueOffset = () => {
+    setHueOffsetEnabled(!hueOffsetEnabled);
   };
   
   const commitAuxChange = (value: string) => {
@@ -166,23 +178,23 @@ export default function PMDColorConverter() {
   
   const pmdColors = [
     { label: '100x (White)', l: 1, c: 0, h: 0, opacities: [100, 32] },
-    { label: '96x (Selection)', l: 0.96, c: 0.016, h: baseHue, opacities: [100] },
-    { label: '88x (Primary)', l: 0.88, c: 0.056, h: baseHue, opacities: [100, 48, 24] },
-    { label: '88x+6 (PrimaryAux)', l: 0.88, c: 0.056, h: baseHue + auxOffset, opacities: [100, 24] },
-    { label: '80x (Secondary)', l: 0.8, c: 0.1, h: baseHue, opacities: [100, 48, 12, 8] },
-    { label: '80x+6 (SecondaryAux)', l: 0.8, c: 0.1, h: baseHue + auxOffset, opacities: [100, 48, 12, 8] },
-    { label: '72x (Accent)', l: 0.72, c: 0.12, h: baseHue, opacities: [100, 80] },
-    { label: '8x (Base)', l: 0.2, c: 0.032, h: baseHue, opacities: [100, 80, 64, 40] },
+    { label: '96x (Selection)', l: 0.96, c: 0.016, h: effectiveBaseHue, opacities: [100] },
+    { label: '88x (Primary)', l: 0.88, c: 0.056, h: effectiveBaseHue, opacities: [100, 48, 24] },
+    { label: '88x+6 (PrimaryAux)', l: 0.88, c: 0.056, h: effectiveAuxOffset, opacities: [100, 24] },
+    { label: '80x (Secondary)', l: 0.8, c: 0.1, h: effectiveBaseHue, opacities: [100, 48, 12, 8] },
+    { label: '80x+6 (SecondaryAux)', l: 0.8, c: 0.1, h: effectiveAuxOffset, opacities: [100, 48, 12, 8] },
+    { label: '72x (Accent)', l: 0.72, c: 0.12, h: effectiveBaseHue, opacities: [100, 80] },
+    { label: '8x (Base)', l: 0.2, c: 0.032, h: effectiveBaseHue, opacities: [100, 80, 64, 40] },
     { label: '0x (Black)', l: 0, c: 0, h: 0, opacities: [100, 80, 64, 40] },
   ];
   
   // PMD color variables
-  const baseRgb = oklchToRgb(0.2, 0.032, baseHue);
-  const surfaceRgb = oklchToRgb(0.8, 0.1, baseHue);
-  const primaryRgb = oklchToRgb(0.88, 0.056, baseHue);
-  const secondaryRgb = oklchToRgb(0.8, 0.1, baseHue);
-  const accentRgb = oklchToRgb(0.72, 0.12, baseHue);
-  const auxRgb = oklchToRgb(0.88, 0.056, baseHue + auxOffset);
+  const baseRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
+  const surfaceRgb = oklchToRgb(0.8, 0.1, effectiveBaseHue);
+  const primaryRgb = oklchToRgb(0.88, 0.056, effectiveBaseHue);
+  const secondaryRgb = oklchToRgb(0.8, 0.1, effectiveBaseHue);
+  const accentRgb = oklchToRgb(0.72, 0.12, effectiveBaseHue);
+  const auxRgb = oklchToRgb(0.88, 0.056, effectiveAuxOffset);
   
   const baseColor = rgbToHex(baseRgb[0], baseRgb[1], baseRgb[2]);
   const surfaceColor = rgbToHex(surfaceRgb[0], surfaceRgb[1], surfaceRgb[2]);
@@ -265,6 +277,41 @@ export default function PMDColorConverter() {
               <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • Try +15 or -30</div>
             </div>
           </div>
+          
+          {/* Hue Offset Toggle */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleHueOffset}
+                className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{
+                  backgroundColor: hueOffsetEnabled ? accentColor : surfaceColor + '3D'
+                }}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                    hueOffsetEnabled ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                  style={{
+                    backgroundColor: hueOffsetEnabled ? primaryColor : accentColor
+                  }}
+                />
+              </button>
+              <div>
+                <div className="text-sm font-medium" style={{ color: primaryColor }}>
+                  +30° Hue Offset {hueOffsetEnabled ? 'ON' : 'OFF'}
+                </div>
+                <div className="text-xs" style={{ color: secondaryColor }}>
+                  Automatically shift all colors by +30° including aux
+                </div>
+              </div>
+            </div>
+            {hueOffsetEnabled && (
+              <div className="mt-2 text-xs p-2 rounded" style={{ backgroundColor: accentColor + '14', color: accentColor }}>
+                Base: {baseHue}° → {effectiveBaseHue}° • Aux: {effectiveAuxOffset}°
+              </div>
+            )}
+          </div>
         </div>
         
         <div 
@@ -279,7 +326,8 @@ export default function PMDColorConverter() {
             Color Usage Demo
           </h2>
           <p className="text-sm mb-4" style={{ color: secondaryColor }}>
-            Primary (88x) for main elements • Aux (+{auxOffset}°) for urgency • Accent (72x) for actions
+            Primary (88x) for main elements • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) for urgency • Accent (72x) for actions
+            {hueOffsetEnabled && ' • +30° offset applied'}
           </p>
           
           <div className="grid grid-cols-3 gap-4">
@@ -342,7 +390,7 @@ export default function PMDColorConverter() {
                   border: `2px solid ${auxColor}3D`
                 }}
               >
-                <div className="text-sm" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, baseHue + auxOffset)) }}>
+                <div className="text-sm" style={{ color: rgbToHex(...oklchToRgb(0.8, 0.1, effectiveAuxOffset)) }}>
                   System status
                 </div>
                 <div className="text-sm font-medium" style={{ color: auxColor }}>
