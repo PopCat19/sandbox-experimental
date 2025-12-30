@@ -349,7 +349,7 @@ export default function PMDColorConverter() {
               }}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-2xl transition-transform ${
                   hueOffsetEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
                 style={{
@@ -366,7 +366,7 @@ export default function PMDColorConverter() {
               </div>
             </div>
             {hueOffsetEnabled && (
-              <div className="ml-auto text-xs p-2 rounded font-nerd" style={{ backgroundColor: accentColor + '14', color: getThemeTextColor(accentColor + '14', accentColor) }}>
+              <div className="ml-auto text-xs p-2 rounded-2xl font-nerd" style={{ backgroundColor: accentColor + '14', color: getThemeTextColor(accentColor + '14', accentColor) }}>
                 Base: {baseHue}° → {effectiveBaseHue}° • Aux: {effectiveAuxOffset}°
               </div>
             )}
