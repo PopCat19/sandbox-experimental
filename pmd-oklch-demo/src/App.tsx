@@ -239,7 +239,7 @@ export default function PMDColorConverter() {
     { label: '88x+6 (PrimaryAux)', l: 0.88, c: 0.056, h: effectiveAuxOffset, opacities: [100, 24] },
     { label: '80x (Secondary)', l: 0.8, c: 0.1, h: effectiveBaseHue, opacities: [100, 48, 12, 8] },
     { label: '80x+6 (SecondaryAux)', l: 0.8, c: 0.1, h: effectiveAuxOffset, opacities: [100, 48, 12, 8] },
-    { label: '72x (Accent)', l: 0.72, c: 0.12, h: effectiveBaseHue, opacities: [100, 80] },
+    { label: '76x (Accent)', l: 0.76, c: 0.12, h: effectiveBaseHue, opacities: [100, 80] },
     { label: '8x (Base)', l: 0.2, c: 0.032, h: effectiveBaseHue, opacities: [100, 80, 64, 40] },
     { label: '0x (Black)', l: 0, c: 0, h: 0, opacities: [100, 80, 64, 40] },
   ];
@@ -249,7 +249,7 @@ export default function PMDColorConverter() {
   const surfaceRgb = oklchToRgb(0.8, 0.1, effectiveBaseHue);
   const primaryRgb = oklchToRgb(0.88, 0.056, effectiveBaseHue);
   const secondaryRgb = oklchToRgb(0.8, 0.1, effectiveBaseHue);
-  const accentRgb = oklchToRgb(0.72, 0.12, effectiveBaseHue);
+  const accentRgb = oklchToRgb(0.76, 0.12, effectiveBaseHue);
   const auxRgb = oklchToRgb(0.88, 0.056, effectiveAuxOffset);
   
   const baseColor = rgbToHex(baseRgb[0], baseRgb[1], baseRgb[2]);
@@ -390,7 +390,7 @@ export default function PMDColorConverter() {
                 Color Usage Demo
               </h2>
               <p className="text-xs mb-3 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
-                Primary (88x) • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) • Accent (72x)
+                Primary (88x) • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) • Accent (76x)
                 {hueOffsetEnabled && ' • +30° offset'}
               </p>
               

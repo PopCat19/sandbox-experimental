@@ -42,10 +42,10 @@
   --pmd-secondary-aux-48: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 48%);
   --pmd-secondary-aux-100: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 100%);
   
-  /* Accent Colors (72x) */
-  --pmd-accent: oklch(0.72 0.12 var(--pmd-effective-base-hue));
-  --pmd-accent-80: oklch(0.72 0.12 var(--pmd-effective-base-hue) / 80%);
-  --pmd-accent-100: oklch(0.72 0.12 var(--pmd-effective-base-hue) / 100%);
+  /* Accent Colors (76x) */
+  --pmd-accent: oklch(0.76 0.12 var(--pmd-effective-base-hue));
+  --pmd-accent-80: oklch(0.76 0.12 var(--pmd-effective-base-hue) / 80%);
+  --pmd-accent-100: oklch(0.76 0.12 var(--pmd-effective-base-hue) / 100%);
   
   /* Base Colors (8x) */
   --pmd-base: oklch(0.2 0.032 var(--pmd-effective-base-hue));
