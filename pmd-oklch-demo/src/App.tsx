@@ -130,24 +130,14 @@ export default function PMDColorConverter() {
   const effectiveAuxOffset = hueOffsetEnabled ? (baseHue + auxOffset + 30) % 360 : (baseHue + auxOffset) % 360;
   
   const commitHueChange = (value: string) => {
-    // Handle calculations like +15, -15
-    if (value.startsWith('+') || value.startsWith('-')) {
-      const delta = parseFloat(value);
-      if (!isNaN(delta)) {
-        const newHue = ((baseHue + delta) % 360 + 360) % 360;
-        setBaseHue(newHue);
-        setBaseHueInput(newHue.toString());
-      }
-    } else {
-      const num = parseFloat(value);
-      if (!isNaN(num)) {
-        const normalized = ((num % 360) + 360) % 360;
-        setBaseHue(normalized);
-        setBaseHueInput(normalized.toString());
-      } else if (value === '') {
-        setBaseHue(0);
-        setBaseHueInput('0');
-      }
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+      const normalized = ((num % 360) + 360) % 360;
+      setBaseHue(normalized);
+      setBaseHueInput(normalized.toString());
+    } else if (value === '') {
+      setBaseHue(0);
+      setBaseHueInput('0');
     }
   };
   
@@ -156,23 +146,13 @@ export default function PMDColorConverter() {
   };
   
   const commitAuxChange = (value: string) => {
-    // Handle calculations like +15, -15
-    if (value.startsWith('+') || value.startsWith('-')) {
-      const delta = parseFloat(value);
-      if (!isNaN(delta)) {
-        const newOffset = auxOffset + delta;
-        setAuxOffset(newOffset);
-        setAuxOffsetInput(newOffset.toString());
-      }
-    } else {
-      const num = parseFloat(value);
-      if (!isNaN(num)) {
-        setAuxOffset(num);
-        setAuxOffsetInput(num.toString());
-      } else if (value === '') {
-        setAuxOffset(0);
-        setAuxOffsetInput('0');
-      }
+    const num = parseFloat(value);
+    if (!isNaN(num)) {
+      setAuxOffset(num);
+      setAuxOffsetInput(num.toString());
+    } else if (value === '') {
+      setAuxOffset(0);
+      setAuxOffsetInput('0');
     }
   };
   
@@ -230,7 +210,9 @@ export default function PMDColorConverter() {
                 Base Hue (degrees)
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
+                max="360"
                 value={baseHueInput}
                 onChange={(e) => setBaseHueInput(e.target.value)}
                 onBlur={(e) => commitHueChange((e.target as HTMLInputElement).value)}
@@ -246,9 +228,9 @@ export default function PMDColorConverter() {
                   color: primaryColor,
                   border: `2px solid ${primaryColor}3D`
                 }}
-                placeholder="0-360 or +/-value"
+                placeholder="0-360"
               />
-              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • Try +15 or -30</div>
+              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • 0-360 degrees</div>
             </div>
             
             <div className="flex-1">
@@ -256,7 +238,9 @@ export default function PMDColorConverter() {
                 Aux Hue Offset (degrees)
               </label>
               <input
-                type="text"
+                type="number"
+                min="0"
+                max="360"
                 value={auxOffsetInput}
                 onChange={(e) => setAuxOffsetInput(e.target.value)}
                 onBlur={(e) => commitAuxChange((e.target as HTMLInputElement).value)}
@@ -272,9 +256,9 @@ export default function PMDColorConverter() {
                   color: primaryColor,
                   border: `2px solid ${primaryColor}3D`
                 }}
-                placeholder="any number or +/-value"
+                placeholder="0-360"
               />
-              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • Try +15 or -30</div>
+              <div className="text-xs mt-1" style={{ color: accentColor }}>Press Enter or blur to apply • 0-360 degrees</div>
             </div>
           </div>
           
