@@ -299,7 +299,7 @@ export default function PMDColorConverter() {
                     (e.target as HTMLInputElement).blur();
                   }
                 }}
-                className="w-full px-3 py-2 rounded focus:outline-none"
+                className="w-full px-3 py-2 rounded-2xl focus:outline-none"
                 style={{
                   backgroundColor: surfaceColor + '14',
                   color: primaryColor,
@@ -327,7 +327,7 @@ export default function PMDColorConverter() {
                     (e.target as HTMLInputElement).blur();
                   }
                 }}
-                className="w-full px-3 py-2 rounded focus:outline-none"
+                className="w-full px-3 py-2 rounded-2xl focus:outline-none"
                 style={{
                   backgroundColor: surfaceColor + '14',
                   color: primaryColor,
@@ -561,7 +561,7 @@ export default function PMDColorConverter() {
                   <div className="text-xs font-medium font-fredoka-semibold" style={{ color: getContrastColor(baseColor) }}>PMD</div>
                   <div className="flex-1" />
                   <button 
-                    className="px-2 py-1 rounded text-xs font-medium transition-opacity font-medium"
+                    className="px-2 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: primaryColor,
                       color: getContrastColor(primaryColor),
@@ -573,7 +573,7 @@ export default function PMDColorConverter() {
                     Home
                   </button>
                   <button 
-                    className="px-2 py-1 rounded text-xs font-medium transition-opacity font-medium"
+                    className="px-2 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: 'transparent',
                       color: getContrastColor(baseColor),
@@ -606,7 +606,7 @@ export default function PMDColorConverter() {
                     
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        className="p-2 rounded text-xs font-medium transition-opacity"
+                        className="p-2 rounded-2xl text-xs font-medium transition-opacity"
                         style={{ 
                           backgroundColor: primaryColor,
                           color: getContrastColor(primaryColor),
@@ -619,7 +619,7 @@ export default function PMDColorConverter() {
                       </button>
                       
                       <button
-                        className="p-2 rounded text-xs font-medium transition-opacity"
+                        className="p-2 rounded-2xl text-xs font-medium transition-opacity"
                         style={{ 
                           backgroundColor: auxColor,
                           color: getContrastColor(auxColor),
@@ -693,7 +693,7 @@ export default function PMDColorConverter() {
                     <div className="text-xs mb-2">Configure preferences</div>
                     <div className="flex gap-2">
                       <button
-                        className="px-2 py-1 rounded text-xs transition-opacity"
+                        className="px-2 py-1 rounded-2xl text-xs transition-opacity"
                         style={{ 
                           backgroundColor: primaryColor,
                           color: getContrastColor(primaryColor),
@@ -705,7 +705,7 @@ export default function PMDColorConverter() {
                         Save
                       </button>
                       <button
-                        className="px-2 py-1 rounded text-xs transition-opacity"
+                        className="px-2 py-1 rounded-2xl text-xs transition-opacity"
                         style={{ 
                           backgroundColor: 'transparent',
                           color: getAutoInvertText(surfaceColor + '14', secondaryColor, secondaryColor),
