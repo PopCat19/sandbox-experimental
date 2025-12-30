@@ -383,7 +383,7 @@ export default function PMDColorConverter() {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleHueOffset}
-              className="relative inline-flex h-6 w-11 items-center rounded-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="relative inline-flex h-6 w-11 items-center rounded-2xl transition-colors focus:outline-none"
               style={{
                 backgroundColor: hueOffsetEnabled ? accentColor : surfaceColor + '3D'
               }}
