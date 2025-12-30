@@ -574,11 +574,11 @@ export default function PMDColorConverter() {
                     backgroundColor: surfaceColor + '14', 
                     border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
                     color: getThemeTextColor(surfaceColor + '14'),
-                    paddingLeft: '12px',
-                    paddingRight: '12px'
+                    paddingLeft: '16px',
+                    paddingRight: '16px'
                   }}
                 >
-                  <div className="text-sm font-bold font-fredoka" style={{ color: primaryColor }}>PMD</div>
+                  <div className="text-base font-bold font-fredoka" style={{ color: primaryColor }}>PMD</div>
                   <div className="flex-1" />
                   <button 
                     className="px-3 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
