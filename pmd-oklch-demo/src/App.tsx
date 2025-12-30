@@ -82,7 +82,16 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
     const g = parseInt(hexColor.slice(3, 5), 16);
     const b = parseInt(hexColor.slice(5, 7), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#FFFFFF';
+    
+    if (brightness > 128) {
+      // Light background - use dark text (8x color)
+      const darkRgb = oklchToRgb(0.2, 0.032, baseHue);
+      return rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
+    } else {
+      // Dark background - use light text (88x color)
+      const lightRgb = oklchToRgb(0.88, 0.056, baseHue);
+      return rgbToHex(lightRgb[0], lightRgb[1], lightRgb[2]);
+    }
   };
   
   const swatchTextColor = getContrastColor(hex);
@@ -150,7 +159,16 @@ export default function PMDColorConverter() {
     const g = parseInt(hexColor.slice(3, 5), 16);
     const b = parseInt(hexColor.slice(5, 7), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-    return brightness > 128 ? '#000000' : '#FFFFFF';
+    
+    if (brightness > 128) {
+      // Light background - use dark text (8x color)
+      const darkRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
+      return rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
+    } else {
+      // Dark background - use light text (88x color)
+      const lightRgb = oklchToRgb(0.88, 0.056, effectiveBaseHue);
+      return rgbToHex(lightRgb[0], lightRgb[1], lightRgb[2]);
+    }
   };
   
   // Auto-invert text color for any background color
