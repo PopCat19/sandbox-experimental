@@ -725,6 +725,119 @@ export default function PMDColorConverter() {
                   </div>
                 </div>
                 
+                {/* Sliders & Checkboxes */}
+                <div>
+                  <div className="text-sm font-semibold mb-2 font-fredoka" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Sliders & Checkboxes</div>
+                  
+                  <div className="space-y-3">
+                    {/* Checkbox Example */}
+                    <div 
+                      className="flex items-center gap-3 p-2 rounded-2xl"
+                      style={{ 
+                        backgroundColor: surfaceColor + '14',
+                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                      }}
+                    >
+                      <div 
+                        className="w-4 h-4 rounded flex items-center justify-center transition-colors"
+                        style={{ 
+                          backgroundColor: primaryColor,
+                          border: `2px solid ${primaryColor}`
+                        }}
+                      >
+                        <div className="text-xs" style={{ color: getContrastColor(primaryColor) }}>✓</div>
+                      </div>
+                      <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Enable notifications</span>
+                    </div>
+                    
+                    <div 
+                      className="flex items-center gap-3 p-2 rounded-2xl"
+                      style={{ 
+                        backgroundColor: surfaceColor + '14',
+                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                      }}
+                    >
+                      <div 
+                        className="w-4 h-4 rounded flex items-center justify-center transition-colors"
+                        style={{ 
+                          backgroundColor: 'transparent',
+                          border: `2px solid ${primaryColor}3D`
+                        }}
+                      >
+                      </div>
+                      <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Dark mode</span>
+                    </div>
+                    
+                    {/* Slider Example */}
+                    <div 
+                      className="p-2 rounded-2xl"
+                      style={{ 
+                        backgroundColor: surfaceColor + '14',
+                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                      }}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Volume</span>
+                        <span className="text-sm font-medium font-fredoka" style={{ color: primaryColor }}>75%</span>
+                      </div>
+                      <div 
+                        className="h-2 rounded-full relative"
+                        style={{ backgroundColor: surfaceColor + '3D' }}
+                      >
+                        <div 
+                          className="h-full rounded-full"
+                          style={{ 
+                            backgroundColor: primaryColor,
+                            width: '75%'
+                          }}
+                        />
+                        <div 
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2"
+                          style={{ 
+                            backgroundColor: primaryColor,
+                            borderColor: primaryColor,
+                            left: 'calc(75% - 8px)'
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Range Slider Example */}
+                    <div 
+                      className="p-2 rounded-2xl"
+                      style={{ 
+                        backgroundColor: surfaceColor + '14',
+                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                      }}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Brightness</span>
+                        <span className="text-sm font-medium font-fredoka" style={{ color: accentColor }}>60%</span>
+                      </div>
+                      <div 
+                        className="h-2 rounded-full relative"
+                        style={{ backgroundColor: surfaceColor + '3D' }}
+                      >
+                        <div 
+                          className="h-full rounded-full"
+                          style={{ 
+                            backgroundColor: accentColor,
+                            width: '60%'
+                          }}
+                        />
+                        <div 
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2"
+                          style={{ 
+                            backgroundColor: accentColor,
+                            borderColor: accentColor,
+                            left: 'calc(60% - 8px)'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
                 {/* Card Example */}
                 <div>
                   <div className="text-sm font-semibold mb-2 font-fredoka" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Card Component</div>
