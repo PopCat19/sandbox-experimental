@@ -622,7 +622,7 @@ export default function PMDColorConverter() {
                   <button 
                     className="px-3 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
-                      backgroundColor: secondaryColor + '12',
+                      backgroundColor: secondaryColor + '8',
                       color: primaryColor,
                       border: 'none',
                       minWidth: '56px',
@@ -631,8 +631,8 @@ export default function PMDColorConverter() {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
+                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
+                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '8'}
                   >
                     Docs
                   </button>
@@ -947,12 +947,12 @@ export default function PMDColorConverter() {
                       <button
                         className="px-4 py-1 rounded-2xl text-sm font-semibold transition-opacity"
                         style={{ 
-                          backgroundColor: secondaryColor + '12',
+                          backgroundColor: secondaryColor + '8',
                           color: primaryColor,
                           border: 'none'
                         }}
-                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
-                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
+                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '8'}
                       >
                         Cancel
                       </button>
