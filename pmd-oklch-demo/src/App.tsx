@@ -384,7 +384,7 @@ export default function PMDColorConverter() {
               </div>
             </div>
             {hueOffsetEnabled && (
-              <div className="ml-auto text-xs p-2 rounded-2xl font-nerd" style={{ backgroundColor: accentColor + '14', color: getOnAccentText(accentColor + '14') }}>
+              <div className="ml-auto text-xs p-2 rounded-2xl font-nerd" style={{ backgroundColor: accentColor + '14', color: getThemeTextColor(accentColor + '14', accentColor) }}>
                 Base: {baseHue}° → {effectiveBaseHue}° • Aux: {effectiveAuxOffset}°
               </div>
             )}
@@ -613,7 +613,7 @@ export default function PMDColorConverter() {
                   <div className="space-y-2">
                     <input
                       type="email"
-                      className="w-full px-2 py-1 rounded-2xl text-xs focus:outline-none"
+                      className="w-full px-2 py-1 rounded-2xl text-xs focus:outline-none placeholder-opacity-60"
                       style={{
                         backgroundColor: surfaceColor + '14',
                         color: primaryColor,
@@ -686,11 +686,11 @@ export default function PMDColorConverter() {
                       style={{ 
                         backgroundColor: accentColor + '14',
                         border: `2px solid ${accentColor}`,
-                        color: getOnAccentText(accentColor + '14')
+                        color: getThemeTextColor(accentColor + '14')
                       }}
                     >
-                      <div className="text-xs font-medium">⚠️ Alert</div>
-                      <div className="text-xs">System notification</div>
+                      <div className="text-xs font-medium" style={{ color: accentColor }}>⚠️ Alert</div>
+                      <div className="text-xs" style={{ color: getThemeTextColor(accentColor + '14', secondaryColor) }}>System notification</div>
                     </div>
                   </div>
                 </div>
