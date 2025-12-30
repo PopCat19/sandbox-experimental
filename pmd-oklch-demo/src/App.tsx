@@ -576,14 +576,19 @@ export default function PMDColorConverter() {
                     color: getThemeTextColor(surfaceColor + '14')
                   }}
                 >
-                  <div className="text-xs font-semibold font-fredoka-semibold" style={{ color: primaryColor }}>PMD</div>
+                  <div className="text-sm font-bold font-fredoka" style={{ color: primaryColor }}>PMD</div>
                   <div className="flex-1" />
                   <button 
                     className="px-2 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: primaryColor,
                       color: getContrastColor(primaryColor),
-                      border: `2px solid ${primaryColor}`
+                      border: `2px solid ${primaryColor}`,
+                      minWidth: '48px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
                     onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
@@ -595,7 +600,12 @@ export default function PMDColorConverter() {
                     style={{ 
                       backgroundColor: 'transparent',
                       color: getContrastColor(baseColor),
-                      border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                      border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
+                      minWidth: '48px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
                     }}
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
                     onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
