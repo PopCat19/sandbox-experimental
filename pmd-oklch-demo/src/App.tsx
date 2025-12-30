@@ -148,6 +148,10 @@ export default function PMDColorConverter() {
   const [baseHueInput, setBaseHueInput] = useState('0');
   const [auxOffsetInput, setAuxOffsetInput] = useState('90');
   const [hueOffsetEnabled, setHueOffsetEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
+  const [volumeLevel, setVolumeLevel] = useState(75);
+  const [brightnessLevel, setBrightnessLevel] = useState(60);
   
   // Apply +30deg offset when enabled
   const effectiveBaseHue = hueOffsetEnabled ? (baseHue + 30) % 360 : baseHue;
@@ -732,38 +736,45 @@ export default function PMDColorConverter() {
                   <div className="space-y-3">
                     {/* Checkbox Example */}
                     <div 
-                      className="flex items-center gap-3 p-2 rounded-2xl"
+                      className="flex items-center gap-3 p-2 rounded-2xl cursor-pointer transition-colors"
                       style={{ 
                         backgroundColor: surfaceColor + '14',
                         border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
                       }}
+                      onClick={() => setNotificationsEnabled(!notificationsEnabled)}
                     >
                       <div 
                         className="w-4 h-4 rounded flex items-center justify-center transition-colors"
                         style={{ 
-                          backgroundColor: primaryColor,
+                          backgroundColor: notificationsEnabled ? primaryColor : 'transparent',
                           border: `2px solid ${primaryColor}`
                         }}
                       >
-                        <div className="text-xs" style={{ color: getContrastColor(primaryColor) }}>✓</div>
+                        {notificationsEnabled && (
+                          <div className="text-xs" style={{ color: getContrastColor(primaryColor) }}>✓</div>
+                        )}
                       </div>
                       <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Enable notifications</span>
                     </div>
                     
                     <div 
-                      className="flex items-center gap-3 p-2 rounded-2xl"
+                      className="flex items-center gap-3 p-2 rounded-2xl cursor-pointer transition-colors"
                       style={{ 
                         backgroundColor: surfaceColor + '14',
                         border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
                       }}
+                      onClick={() => setDarkModeEnabled(!darkModeEnabled)}
                     >
                       <div 
                         className="w-4 h-4 rounded flex items-center justify-center transition-colors"
                         style={{ 
-                          backgroundColor: 'transparent',
-                          border: `2px solid ${primaryColor}3D`
+                          backgroundColor: darkModeEnabled ? primaryColor : 'transparent',
+                          border: `2px solid ${primaryColor}`
                         }}
                       >
+                        {darkModeEnabled && (
+                          <div className="text-xs" style={{ color: getContrastColor(primaryColor) }}>✓</div>
+                        )}
                       </div>
                       <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Dark mode</span>
                     </div>
@@ -778,25 +789,47 @@ export default function PMDColorConverter() {
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Volume</span>
-                        <span className="text-sm font-medium font-fredoka" style={{ color: primaryColor }}>75%</span>
+                        <span className="text-sm font-medium font-fredoka" style={{ color: primaryColor }}>{volumeLevel}%</span>
                       </div>
                       <div 
-                        className="h-2 rounded-full relative"
+                        className="h-2 rounded-full relative cursor-pointer"
                         style={{ backgroundColor: surfaceColor + '3D' }}
+                        onClick={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const clickX = e.clientX - rect.left;
+                          const percentage = Math.round((clickX / rect.width) * 100);
+                          setVolumeLevel(Math.max(0, Math.min(100, percentage)));
+                        }}
                       >
                         <div 
-                          className="h-full rounded-full"
+                          className="h-full rounded-full transition-all"
                           style={{ 
                             backgroundColor: primaryColor,
-                            width: '75%'
+                            width: `${volumeLevel}%`
                           }}
                         />
                         <div 
-                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2"
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110"
                           style={{ 
                             backgroundColor: primaryColor,
                             borderColor: primaryColor,
-                            left: 'calc(75% - 8px)'
+                            left: `calc(${volumeLevel}% - 8px)`
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            const handleMouseMove = (moveEvent: MouseEvent) => {
+                              const slider = e.currentTarget.parentElement!;
+                              const rect = slider.getBoundingClientRect();
+                              const moveX = moveEvent.clientX - rect.left;
+                              const percentage = Math.round((moveX / rect.width) * 100);
+                              setVolumeLevel(Math.max(0, Math.min(100, percentage)));
+                            };
+                            const handleMouseUp = () => {
+                              document.removeEventListener('mousemove', handleMouseMove);
+                              document.removeEventListener('mouseup', handleMouseUp);
+                            };
+                            document.addEventListener('mousemove', handleMouseMove);
+                            document.addEventListener('mouseup', handleMouseUp);
                           }}
                         />
                       </div>
@@ -812,25 +845,47 @@ export default function PMDColorConverter() {
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-sm font-medium font-fredoka" style={{ color: getContrastColor(baseColor) }}>Brightness</span>
-                        <span className="text-sm font-medium font-fredoka" style={{ color: accentColor }}>60%</span>
+                        <span className="text-sm font-medium font-fredoka" style={{ color: accentColor }}>{brightnessLevel}%</span>
                       </div>
                       <div 
-                        className="h-2 rounded-full relative"
+                        className="h-2 rounded-full relative cursor-pointer"
                         style={{ backgroundColor: surfaceColor + '3D' }}
+                        onClick={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const clickX = e.clientX - rect.left;
+                          const percentage = Math.round((clickX / rect.width) * 100);
+                          setBrightnessLevel(Math.max(0, Math.min(100, percentage)));
+                        }}
                       >
                         <div 
-                          className="h-full rounded-full"
+                          className="h-full rounded-full transition-all"
                           style={{ 
                             backgroundColor: accentColor,
-                            width: '60%'
+                            width: `${brightnessLevel}%`
                           }}
                         />
                         <div 
-                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2"
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110"
                           style={{ 
                             backgroundColor: accentColor,
                             borderColor: accentColor,
-                            left: 'calc(60% - 8px)'
+                            left: `calc(${brightnessLevel}% - 8px)`
+                          }}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            const handleMouseMove = (moveEvent: MouseEvent) => {
+                              const slider = e.currentTarget.parentElement!;
+                              const rect = slider.getBoundingClientRect();
+                              const moveX = moveEvent.clientX - rect.left;
+                              const percentage = Math.round((moveX / rect.width) * 100);
+                              setBrightnessLevel(Math.max(0, Math.min(100, percentage)));
+                            };
+                            const handleMouseUp = () => {
+                              document.removeEventListener('mousemove', handleMouseMove);
+                              document.removeEventListener('mouseup', handleMouseUp);
+                            };
+                            document.addEventListener('mousemove', handleMouseMove);
+                            document.addEventListener('mouseup', handleMouseUp);
                           }}
                         />
                       </div>
