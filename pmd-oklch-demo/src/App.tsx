@@ -723,7 +723,7 @@ export default function PMDColorConverter() {
                     <div className="text-sm font-medium font-fredoka mb-2">Configure preferences</div>
                     <div className="flex gap-2">
                       <button
-                        className="px-2 py-1 rounded-2xl text-xs transition-opacity"
+                        className="px-4 py-1 rounded-2xl text-sm font-semibold transition-opacity"
                         style={{ 
                           backgroundColor: primaryColor,
                           color: getContrastColor(primaryColor),
@@ -735,7 +735,7 @@ export default function PMDColorConverter() {
                         Save
                       </button>
                       <button
-                        className="px-2 py-1 rounded-2xl text-xs transition-opacity"
+                        className="px-4 py-1 rounded-2xl text-sm font-semibold transition-opacity"
                         style={{ 
                           backgroundColor: 'transparent',
                           color: getAutoInvertText(surfaceColor + '14', secondaryColor, secondaryColor),
