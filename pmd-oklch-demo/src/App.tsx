@@ -462,7 +462,7 @@ export default function PMDColorConverter() {
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="text-sm font-semibold font-fredoka" style={{ color: auxColor }}>Aux/Urgent State</div>
+                  <div className="text-sm font-semibold font-fredoka" style={{ color: auxColor }}>Aux/Auxiliary State</div>
                   
                   <div 
                     className="p-2 rounded"
@@ -680,7 +680,7 @@ export default function PMDColorConverter() {
                         onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
                         onMouseLeave={(e) => (e.target as HTMLButtonElement).style.opacity = '1'}
                       >
-                        Urgent
+                        Auxiliary
                       </button>
                     </div>
                   </div>

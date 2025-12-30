@@ -174,7 +174,7 @@
   backdrop-filter: blur(24px);
 }
 
-.pmd-urgent {
+.pmd-auxiliary {
   background-color: var(--pmd-primary-aux-24);
   border: 2px solid var(--pmd-primary-aux);
   color: var(--pmd-primary-aux);
@@ -220,7 +220,7 @@ const pmdStyles = {
     color: 'var(--pmd-primary)',
     border: '2px solid var(--pmd-accent)'
   },
-  urgent: {
+  auxiliary: {
     backgroundColor: 'var(--pmd-primary-aux-24)',
     color: 'var(--pmd-primary-aux)',
     border: '2px solid var(--pmd-primary-aux)'
