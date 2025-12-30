@@ -583,7 +583,7 @@ export default function PMDColorConverter() {
               <h2 className="text-lg font-bold mb-3 font-fredoka" style={{ color: primaryColor }}>
                 Component Preview
               </h2>
-              <p className="text-xs mb-4" style={{ color: secondaryColor }}>
+              <p className="text-xs mb-4 font-medium" style={{ color: secondaryColor }}>
                 PMD colors in real UI components
               </p>
               
