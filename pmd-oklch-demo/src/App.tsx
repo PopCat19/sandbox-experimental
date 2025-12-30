@@ -573,7 +573,9 @@ export default function PMDColorConverter() {
                   style={{ 
                     backgroundColor: surfaceColor + '14', 
                     border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
-                    color: getThemeTextColor(surfaceColor + '14')
+                    color: getThemeTextColor(surfaceColor + '14'),
+                    marginLeft: '12px',
+                    marginRight: '12px'
                   }}
                 >
                   <div className="text-sm font-bold font-fredoka" style={{ color: primaryColor }}>PMD</div>
