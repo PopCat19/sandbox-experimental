@@ -622,17 +622,17 @@ export default function PMDColorConverter() {
                   <button 
                     className="px-3 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
-                      backgroundColor: 'transparent',
+                      backgroundColor: secondaryColor + '12',
                       color: primaryColor,
-                      border: `2px solid ${primaryColor}3D`,
+                      border: 'none',
                       minWidth: '56px',
                       height: '28px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
+                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
+                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
                   >
                     Docs
                   </button>
@@ -947,12 +947,12 @@ export default function PMDColorConverter() {
                       <button
                         className="px-4 py-1 rounded-2xl text-sm font-semibold transition-opacity"
                         style={{ 
-                          backgroundColor: 'transparent',
-                          color: getAutoInvertText(surfaceColor + '14', secondaryColor, secondaryColor),
-                          border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                          backgroundColor: secondaryColor + '12',
+                          color: primaryColor,
+                          border: 'none'
                         }}
-                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
-                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
+                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
                       >
                         Cancel
                       </button>
