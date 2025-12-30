@@ -76,9 +76,8 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
   const hoverRgb = oklchToRgb(0.8, 0.1, baseHue);
   const hoverHex = rgbToHex(hoverRgb[0], hoverRgb[1], hoverRgb[2]);
   
-  // Better text colors for visibility
+  // Auto-invert text color based on background
   const getContrastColor = (hexColor: string) => {
-    // Simple contrast calculation - use white for dark colors, dark for light colors
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
     const b = parseInt(hexColor.slice(5, 7), 16);
@@ -102,12 +101,12 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
         style={{ 
           backgroundColor: hex,
           opacity: opacity / 100,
-          border: `2px solid ${primaryHex}3D`
+          border: `2px solid ${getContrastColor(hex) === '#FFFFFF' ? '#FFFFFF33' : '#00000033'}`
         }}
       >
         <div 
           className="absolute inset-0 flex items-center justify-center text-xs font-mono"
-          style={{ color: swatchTextColor }}
+          style={{ color: getContrastColor(hex) }}
         >
           {Math.round(opacity)}%
         </div>
@@ -144,6 +143,47 @@ export default function PMDColorConverter() {
   // Apply +30deg offset when enabled
   const effectiveBaseHue = hueOffsetEnabled ? (baseHue + 30) % 360 : baseHue;
   const effectiveAuxOffset = hueOffsetEnabled ? (baseHue + auxOffset + 30) % 360 : (baseHue + auxOffset) % 360;
+  
+  // Auto-invert text color based on background
+  const getContrastColor = (hexColor: string) => {
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 128 ? '#000000' : '#FFFFFF';
+  };
+  
+  // Auto-invert text color for any background color
+  const getAutoInvertText = (backgroundColor: string, darkText?: string, lightText?: string) => {
+    const r = parseInt(backgroundColor.slice(1, 3), 16);
+    const g = parseInt(backgroundColor.slice(3, 5), 16);
+    const b = parseInt(backgroundColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    if (brightness > 128) {
+      // Light background - use dark text
+      return darkText || '#000000';
+    } else {
+      // Dark background - use light text
+      return lightText || '#FFFFFF';
+    }
+  };
+  
+  // Auto-invert border color
+  const getAutoInvertBorder = (backgroundColor: string) => {
+    const r = parseInt(backgroundColor.slice(1, 3), 16);
+    const g = parseInt(backgroundColor.slice(3, 5), 16);
+    const b = parseInt(backgroundColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    if (brightness > 128) {
+      // Light background - use darker border
+      return '#00000033';
+    } else {
+      // Dark background - use lighter border
+      return '#FFFFFF33';
+    }
+  };
   
   const commitHueChange = (value: string) => {
     const num = parseFloat(value);
@@ -545,7 +585,7 @@ export default function PMDColorConverter() {
                         className="p-2 rounded text-xs font-medium transition-opacity"
                         style={{ 
                           backgroundColor: primaryColor,
-                          color: 'white',
+                          color: getContrastColor(primaryColor),
                           border: `2px solid ${primaryColor}`
                         }}
                         onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
@@ -558,7 +598,7 @@ export default function PMDColorConverter() {
                         className="p-2 rounded text-xs font-medium transition-opacity"
                         style={{ 
                           backgroundColor: auxColor,
-                          color: 'white',
+                          color: getContrastColor(auxColor),
                           border: `2px solid ${auxColor}`
                         }}
                         onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
@@ -577,29 +617,38 @@ export default function PMDColorConverter() {
                   <div className="space-y-2">
                     <div 
                       className="flex items-center gap-2 p-2 rounded"
-                      style={{ backgroundColor: primaryColor + '14', border: `2px solid ${primaryColor}24` }}
+                      style={{ 
+                        backgroundColor: primaryColor + '14', 
+                        border: `2px solid ${getAutoInvertBorder(primaryColor + '14')}`,
+                        color: getAutoInvertText(primaryColor + '14', primaryColor, primaryColor)
+                      }}
                     >
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }} />
-                      <span className="text-xs" style={{ color: primaryColor }}>Active</span>
+                      <span className="text-xs">Active</span>
                     </div>
                     
                     <div 
                       className="flex items-center gap-2 p-2 rounded"
-                      style={{ backgroundColor: auxColor + '14', border: `2px solid ${auxColor}24` }}
+                      style={{ 
+                        backgroundColor: auxColor + '14', 
+                        border: `2px solid ${getAutoInvertBorder(auxColor + '14')}`,
+                        color: getAutoInvertText(auxColor + '14', auxColor, auxColor)
+                      }}
                     >
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: auxColor }} />
-                      <span className="text-xs" style={{ color: auxColor }}>Warning</span>
+                      <span className="text-xs">Warning</span>
                     </div>
                     
                     <div 
                       className="p-2 rounded"
                       style={{ 
                         backgroundColor: accentColor + '14',
-                        border: `2px solid ${accentColor}`
+                        border: `2px solid ${accentColor}`,
+                        color: getAutoInvertText(accentColor + '14', accentColor, accentColor)
                       }}
                     >
-                      <div className="text-xs font-medium" style={{ color: accentColor }}>⚠️ Alert</div>
-                      <div className="text-xs" style={{ color: accentColor }}>System notification</div>
+                      <div className="text-xs font-medium">⚠️ Alert</div>
+                      <div className="text-xs">System notification</div>
                     </div>
                   </div>
                 </div>
@@ -612,17 +661,18 @@ export default function PMDColorConverter() {
                     className="p-3 rounded"
                     style={{ 
                       backgroundColor: surfaceColor + '14',
-                      border: `2px solid ${primaryColor}24`
+                      border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
+                      color: getAutoInvertText(surfaceColor + '14', primaryColor, secondaryColor)
                     }}
                   >
-                    <div className="text-xs font-medium mb-1" style={{ color: primaryColor }}>Settings</div>
-                    <div className="text-xs mb-2" style={{ color: secondaryColor }}>Configure preferences</div>
+                    <div className="text-xs font-medium mb-1">Settings</div>
+                    <div className="text-xs mb-2">Configure preferences</div>
                     <div className="flex gap-2">
                       <button
                         className="px-2 py-1 rounded text-xs transition-opacity"
                         style={{ 
                           backgroundColor: primaryColor,
-                          color: 'white',
+                          color: getContrastColor(primaryColor),
                           border: `2px solid ${primaryColor}`
                         }}
                         onMouseEnter={(e) => (e.target as HTMLButtonElement).style.opacity = '0.8'}
@@ -634,8 +684,8 @@ export default function PMDColorConverter() {
                         className="px-2 py-1 rounded text-xs transition-opacity"
                         style={{ 
                           backgroundColor: 'transparent',
-                          color: secondaryColor,
-                          border: `2px solid ${primaryColor}24`
+                          color: getAutoInvertText(surfaceColor + '14', secondaryColor, secondaryColor),
+                          border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
                         }}
                         onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
                         onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = 'transparent'}
