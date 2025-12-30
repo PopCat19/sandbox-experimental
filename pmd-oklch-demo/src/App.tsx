@@ -119,9 +119,9 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
 }
 
 export default function PMDColorConverter() {
-  const [baseHue, setBaseHue] = useState(345);
+  const [baseHue, setBaseHue] = useState(0);
   const [auxOffset, setAuxOffset] = useState(90);
-  const [baseHueInput, setBaseHueInput] = useState('345');
+  const [baseHueInput, setBaseHueInput] = useState('0');
   const [auxOffsetInput, setAuxOffsetInput] = useState('90');
   const [hueOffsetEnabled, setHueOffsetEnabled] = useState(false);
   

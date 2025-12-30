@@ -9,7 +9,7 @@
  */
 :root {
   /* Base hue variables */
-  --pmd-base-hue: 345deg;
+  --pmd-base-hue: 0deg;
   --pmd-aux-offset: 90deg;
   --pmd-hue-offset-enabled: false;
   

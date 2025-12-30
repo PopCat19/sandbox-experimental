@@ -32,7 +32,7 @@ export class PMDColorSystem {
     config: Partial<PMDHueConfig> = {}
   ) {
     this.element = element;
-    this.baseHue = config.baseHue ?? 345;
+    this.baseHue = config.baseHue ?? 0;
     this.auxOffset = config.auxOffset ?? 90;
     this.hueOffsetEnabled = config.hueOffsetEnabled ?? false;
     this.applyToDOM();
