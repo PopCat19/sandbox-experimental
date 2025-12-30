@@ -401,7 +401,7 @@ export default function PMDColorConverter() {
               <div className="text-sm font-medium font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
                 +30° Hue Offset {hueOffsetEnabled ? 'ON' : 'OFF'}
               </div>
-              <div className="text-xs font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
+              <div className="text-xs font-medium" style={{ color: secondaryColor }}>
                 Automatically shift all colors by +30° including aux
               </div>
             </div>
@@ -429,7 +429,7 @@ export default function PMDColorConverter() {
               <h2 className="text-lg font-bold mb-3 font-fredoka" style={{ color: primaryColor }}>
                 Color Usage Demo
               </h2>
-              <p className="text-xs mb-3 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
+              <p className="text-xs mb-3 font-medium" style={{ color: secondaryColor }}>
                 Primary (80x) • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) • Accent (72x)
                 {hueOffsetEnabled && ' • +30° offset'}
               </p>
@@ -462,7 +462,7 @@ export default function PMDColorConverter() {
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="text-xs font-medium" style={{ color: auxColor }}>Aux/Urgent State</div>
+                  <div className="text-sm font-semibold font-fredoka" style={{ color: auxColor }}>Aux/Urgent State</div>
                   
                   <div 
                     className="p-2 rounded"
@@ -622,7 +622,7 @@ export default function PMDColorConverter() {
                   <button 
                     className="px-3 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
                     style={{ 
-                      backgroundColor: secondaryColor + '8',
+                      backgroundColor: secondaryColor + '14',
                       color: primaryColor,
                       border: 'none',
                       minWidth: '56px',
@@ -631,8 +631,8 @@ export default function PMDColorConverter() {
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}
-                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
-                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '8'}
+                    onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
+                    onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '14'}
                   >
                     Docs
                   </button>
@@ -784,7 +784,9 @@ export default function PMDColorConverter() {
                       className="p-2 rounded-2xl"
                       style={{ 
                         backgroundColor: surfaceColor + '14',
-                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
+                        marginLeft: '4px',
+                        marginRight: '4px'
                       }}
                     >
                       <div className="flex items-center gap-3 mb-2">
@@ -793,7 +795,11 @@ export default function PMDColorConverter() {
                       </div>
                       <div 
                         className="h-2 rounded-full relative cursor-pointer"
-                        style={{ backgroundColor: surfaceColor + '3D' }}
+                        style={{ 
+                          backgroundColor: surfaceColor + '3D',
+                          marginLeft: '4px',
+                          marginRight: '4px'
+                        }}
                         onClick={(e) => {
                           const rect = e.currentTarget.getBoundingClientRect();
                           const clickX = e.clientX - rect.left;
@@ -802,14 +808,14 @@ export default function PMDColorConverter() {
                         }}
                       >
                         <div 
-                          className="h-full rounded-full transition-all"
+                          className="h-full rounded-full"
                           style={{ 
                             backgroundColor: primaryColor,
                             width: `${volumeLevel}%`
                           }}
                         />
                         <div 
-                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110 z-10"
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing z-10"
                           style={{ 
                             backgroundColor: primaryColor,
                             borderColor: primaryColor,
@@ -852,7 +858,9 @@ export default function PMDColorConverter() {
                       className="p-2 rounded-2xl"
                       style={{ 
                         backgroundColor: surfaceColor + '14',
-                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
+                        border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
+                        marginLeft: '4px',
+                        marginRight: '4px'
                       }}
                     >
                       <div className="flex items-center gap-3 mb-2">
@@ -861,7 +869,11 @@ export default function PMDColorConverter() {
                       </div>
                       <div 
                         className="h-2 rounded-full relative cursor-pointer"
-                        style={{ backgroundColor: surfaceColor + '3D' }}
+                        style={{ 
+                          backgroundColor: surfaceColor + '3D',
+                          marginLeft: '4px',
+                          marginRight: '4px'
+                        }}
                         onClick={(e) => {
                           const rect = e.currentTarget.getBoundingClientRect();
                           const clickX = e.clientX - rect.left;
@@ -870,14 +882,14 @@ export default function PMDColorConverter() {
                         }}
                       >
                         <div 
-                          className="h-full rounded-full transition-all"
+                          className="h-full rounded-full"
                           style={{ 
                             backgroundColor: accentColor,
                             width: `${brightnessLevel}%`
                           }}
                         />
                         <div 
-                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing transition-all hover:scale-110 z-10"
+                          className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 rounded-full border-2 cursor-grab active:cursor-grabbing z-10"
                           style={{ 
                             backgroundColor: accentColor,
                             borderColor: accentColor,
@@ -947,12 +959,12 @@ export default function PMDColorConverter() {
                       <button
                         className="px-4 py-1 rounded-2xl text-sm font-semibold transition-opacity"
                         style={{ 
-                          backgroundColor: secondaryColor + '8',
+                          backgroundColor: secondaryColor + '14',
                           color: primaryColor,
                           border: 'none'
                         }}
-                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '12'}
-                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '8'}
+                        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
+                        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '14'}
                       >
                         Cancel
                       </button>
