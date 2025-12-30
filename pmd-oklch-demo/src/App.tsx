@@ -576,7 +576,7 @@ export default function PMDColorConverter() {
                     color: getThemeTextColor(surfaceColor + '14')
                   }}
                 >
-                  <div className="text-xs font-medium font-fredoka-semibold" style={{ color: getContrastColor(baseColor) }}>PMD</div>
+                  <div className="text-xs font-semibold font-fredoka-semibold" style={{ color: primaryColor }}>PMD</div>
                   <div className="flex-1" />
                   <button 
                     className="px-2 py-1 rounded-2xl text-xs font-medium transition-opacity font-medium"
