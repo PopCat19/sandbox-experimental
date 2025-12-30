@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Fredoka+SemiBold&family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,7 +7,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Fredoka', 'M PLUS Rounded 1c', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -15,3 +17,15 @@ body {
 * {
   box-sizing: border-box;
 }
+
+/* PMD Font Classes */
+.font-fredoka { font-family: 'Fredoka', sans-serif; }
+.font-fredoka-semibold { font-family: 'Fredoka SemiBold', sans-serif; }
+.font-mplus { font-family: 'M PLUS Rounded 1c', sans-serif; }
+.font-nerd { font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace; }
+
+/* Font Weights */
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.font-normal { font-weight: 400; }

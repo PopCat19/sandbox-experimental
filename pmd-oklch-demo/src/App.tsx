@@ -185,6 +185,26 @@ export default function PMDColorConverter() {
     }
   };
   
+  // Get text color based on theme (8x for dark, 88x for light)
+  const getThemeTextColor = (backgroundColor: string, darkText?: string, lightText?: string) => {
+    const r = parseInt(backgroundColor.slice(1, 3), 16);
+    const g = parseInt(backgroundColor.slice(3, 5), 16);
+    const b = parseInt(backgroundColor.slice(5, 7), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    if (brightness > 128) {
+      // Light background - use dark text (8x color)
+      const darkRgb = oklchToRgb(0.2, 0.032, effectiveBaseHue);
+      const darkHex = rgbToHex(darkRgb[0], darkRgb[1], darkRgb[2]);
+      return darkText || darkHex;
+    } else {
+      // Dark background - use light text (88x color)
+      const lightRgb = oklchToRgb(0.88, 0.056, effectiveBaseHue);
+      const lightHex = rgbToHex(lightRgb[0], lightRgb[1], lightRgb[2]);
+      return lightText || lightHex;
+    }
+  };
+  
   const commitHueChange = (value: string) => {
     const num = parseFloat(value);
     if (!isNaN(num)) {
@@ -254,16 +274,16 @@ export default function PMDColorConverter() {
             border: `2px solid ${primaryColor}3D`
           }}
         >
-          <h1 className="text-2xl font-bold mb-2" style={{ color: primaryColor }}>
+          <h1 className="text-2xl font-bold mb-2 font-fredoka" style={{ color: primaryColor }}>
             PMD OKLCH Color Converter
           </h1>
-          <p className="text-sm mb-4" style={{ color: secondaryColor }}>
+          <p className="text-sm mb-4 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
             Visualize your Project Minimalist Design palette with OKLCH values
           </p>
           
           <div className="flex gap-4 mb-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-2" style={{ color: primaryColor }}>
+              <label className="block text-sm font-medium mb-2 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
                 Base Hue (degrees)
               </label>
               <input
@@ -291,7 +311,7 @@ export default function PMDColorConverter() {
             </div>
             
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-2" style={{ color: primaryColor }}>
+              <label className="block text-sm font-medium mb-2 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
                 Aux Hue Offset (degrees)
               </label>
               <input
@@ -315,7 +335,7 @@ export default function PMDColorConverter() {
                 }}
                 placeholder="0-360"
               />
-              <div className="text-xs mt-1" style={{ color: accentColor }}>0-360 degrees</div>
+              <div className="text-xs mt-1 font-nerd" style={{ color: getThemeTextColor(baseColor + 'A6', accentColor) }}>0-360 degrees</div>
             </div>
           </div>
           
@@ -338,15 +358,15 @@ export default function PMDColorConverter() {
               />
             </button>
             <div>
-              <div className="text-sm font-medium" style={{ color: primaryColor }}>
+              <div className="text-sm font-medium font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
                 +30° Hue Offset {hueOffsetEnabled ? 'ON' : 'OFF'}
               </div>
-              <div className="text-xs" style={{ color: secondaryColor }}>
+              <div className="text-xs font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
                 Automatically shift all colors by +30° including aux
               </div>
             </div>
             {hueOffsetEnabled && (
-              <div className="ml-auto text-xs p-2 rounded" style={{ backgroundColor: accentColor + '14', color: accentColor }}>
+              <div className="ml-auto text-xs p-2 rounded font-nerd" style={{ backgroundColor: accentColor + '14', color: getThemeTextColor(accentColor + '14', accentColor) }}>
                 Base: {baseHue}° → {effectiveBaseHue}° • Aux: {effectiveAuxOffset}°
               </div>
             )}
@@ -366,17 +386,17 @@ export default function PMDColorConverter() {
                 border: `2px solid ${primaryColor}3D`
               }}
             >
-              <h2 className="text-lg font-semibold mb-3" style={{ color: primaryColor }}>
+              <h2 className="text-lg font-semibold mb-3 font-fredoka-semibold" style={{ color: primaryColor }}>
                 Color Usage Demo
               </h2>
-              <p className="text-xs mb-3" style={{ color: secondaryColor }}>
+              <p className="text-xs mb-3 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
                 Primary (88x) • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) • Accent (72x)
                 {hueOffsetEnabled && ' • +30° offset'}
               </p>
               
               <div className="grid grid-cols-1 gap-3">
                 <div className="space-y-2">
-                  <div className="text-xs font-medium" style={{ color: primaryColor }}>Primary State</div>
+                  <div className="text-xs font-medium font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Primary State</div>
                   
                   <div 
                     className="p-2 rounded"
@@ -430,7 +450,7 @@ export default function PMDColorConverter() {
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="text-xs font-medium" style={{ color: accentColor }}>Accent/Action</div>
+                  <div className="text-xs font-medium font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Accent/Action</div>
                   
                   <button
                     className="w-full p-2 rounded transition-opacity"
@@ -535,13 +555,13 @@ export default function PMDColorConverter() {
                   style={{ 
                     backgroundColor: surfaceColor + '14', 
                     border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`,
-                    color: getAutoInvertText(surfaceColor + '14', primaryColor, secondaryColor)
+                    color: getThemeTextColor(surfaceColor + '14')
                   }}
                 >
-                  <div className="text-xs font-medium">PMD</div>
+                  <div className="text-xs font-medium font-fredoka-semibold">PMD</div>
                   <div className="flex-1" />
                   <button 
-                    className="px-2 py-1 rounded text-xs font-medium transition-opacity"
+                    className="px-2 py-1 rounded text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: primaryColor,
                       color: getContrastColor(primaryColor),
@@ -553,10 +573,10 @@ export default function PMDColorConverter() {
                     Home
                   </button>
                   <button 
-                    className="px-2 py-1 rounded text-xs font-medium transition-opacity"
+                    className="px-2 py-1 rounded text-xs font-medium transition-opacity font-medium"
                     style={{ 
                       backgroundColor: 'transparent',
-                      color: getAutoInvertText(surfaceColor + '14', secondaryColor, secondaryColor),
+                      color: getThemeTextColor(surfaceColor + '14'),
                       border: `2px solid ${getAutoInvertBorder(surfaceColor + '14')}`
                     }}
                     onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = surfaceColor + '14'}
@@ -659,7 +679,7 @@ export default function PMDColorConverter() {
                 
                 {/* Card Example */}
                 <div>
-                  <div className="text-xs font-medium mb-2" style={{ color: primaryColor }}>Card Component</div>
+                  <div className="text-xs font-medium mb-2 font-semibold" style={{ color: getThemeTextColor(baseColor + 'A6') }}>Card Component</div>
                   
                   <div 
                     className="p-3 rounded"
