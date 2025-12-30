@@ -430,7 +430,7 @@ export default function PMDColorConverter() {
                 Color Usage Demo
               </h2>
               <p className="text-xs mb-3 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
-                Primary (88x) • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) • Accent (76x)
+                Primary (80x) • Aux (+{hueOffsetEnabled ? auxOffset + 30 : auxOffset}°) • Accent (76x)
                 {hueOffsetEnabled && ' • +30° offset'}
               </p>
               
