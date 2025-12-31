@@ -23,7 +23,7 @@
   --pmd-primary-48: oklch(0.88 0.056 var(--pmd-effective-base-hue) / 48%);
   --pmd-primary-100: oklch(0.88 0.056 var(--pmd-effective-base-hue) / 100%);
   
-  /* Primary Auxiliary Colors (88x+6) */
+  /* Primary Auxiliary Colors (88x+12) */
   --pmd-primary-aux: oklch(0.88 0.056 var(--pmd-effective-aux-hue));
   --pmd-primary-aux-24: oklch(0.88 0.056 var(--pmd-effective-aux-hue) / 24%);
   --pmd-primary-aux-100: oklch(0.88 0.056 var(--pmd-effective-aux-hue) / 100%);
@@ -35,7 +35,7 @@
   --pmd-secondary-48: oklch(0.8 0.1 var(--pmd-effective-base-hue) / 48%);
   --pmd-secondary-100: oklch(0.8 0.1 var(--pmd-effective-base-hue) / 100%);
   
-  /* Secondary Auxiliary Colors (80x+6) */
+  /* Secondary Auxiliary Colors (80x+12) */
   --pmd-secondary-aux: oklch(0.8 0.1 var(--pmd-effective-aux-hue));
   --pmd-secondary-aux-8: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 8%);
   --pmd-secondary-aux-12: oklch(0.8 0.1 var(--pmd-effective-aux-hue) / 12%);

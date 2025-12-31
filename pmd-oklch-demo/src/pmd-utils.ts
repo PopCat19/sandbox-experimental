@@ -222,9 +222,9 @@ export const PMD_COLORS = {
   white: { l: 1, c: 0, h: 0, aux: false },
   '96x': { l: 0.96, c: 0.016, h: 0, aux: false },
   '88x': { l: 0.88, c: 0.056, h: 0, aux: false },
-  '88x+6': { l: 0.88, c: 0.056, h: 0, aux: true },
+  '88x+12': { l: 0.88, c: 0.056, h: 0, aux: true },
   '80x': { l: 0.8, c: 0.1, h: 0, aux: false },
-  '80x+6': { l: 0.8, c: 0.1, h: 0, aux: true },
+  '80x+12': { l: 0.8, c: 0.1, h: 0, aux: true },
   '72x': { l: 0.72, c: 0.122, h: 0, aux: false },
   '8x': { l: 0.2, c: 0.032, h: 0, aux: false },
   black: { l: 0, c: 0, h: 0, aux: false }
@@ -269,8 +269,8 @@ export function getEffectivePMDColors(element: HTMLElement = document.documentEl
     aux: {
       hue: system.getEffectiveAuxHue(),
       colors: {
-        '88x+6': system.getPMDColorHex('88x+6'),
-        '80x+6': system.getPMDColorHex('80x+6')
+        '88x+12': system.getPMDColorHex('88x+12'),
+        '80x+12': system.getPMDColorHex('80x+12')
       }
     },
     config
