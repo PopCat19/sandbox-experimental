@@ -144,9 +144,9 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
 
 export default function PMDColorConverter() {
   const [baseHue, setBaseHue] = useState(0);
-  const [auxOffset, setAuxOffset] = useState(90);
+  const [auxOffset, setAuxOffset] = useState(180);
   const [baseHueInput, setBaseHueInput] = useState('0');
-  const [auxOffsetInput, setAuxOffsetInput] = useState('90');
+  const [auxOffsetInput, setAuxOffsetInput] = useState('180');
   const [hueOffsetEnabled, setHueOffsetEnabled] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
@@ -261,6 +261,13 @@ export default function PMDColorConverter() {
     setHueOffsetEnabled(!hueOffsetEnabled);
   };
   
+  const adjustHue = (delta: number) => {
+    const newHue = (baseHue + delta) % 360;
+    const normalizedHue = newHue < 0 ? newHue + 360 : newHue;
+    setBaseHue(normalizedHue);
+    setBaseHueInput(normalizedHue.toString());
+  };
+  
   const commitAuxChange = (value: string) => {
     const num = parseFloat(value);
     if (!isNaN(num)) {
@@ -326,27 +333,57 @@ export default function PMDColorConverter() {
               <label className="block text-sm font-medium mb-2 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
                 Base Hue (degrees)
               </label>
-              <input
-                type="number"
-                min="0"
-                max="360"
-                value={baseHueInput}
-                onChange={(e) => setBaseHueInput(e.target.value)}
-                onBlur={(e) => commitHueChange((e.target as HTMLInputElement).value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    commitHueChange((e.target as HTMLInputElement).value);
-                    (e.target as HTMLInputElement).blur();
-                  }
-                }}
-                className="w-full px-3 py-2 rounded-2xl focus:outline-none"
-                style={{
-                  backgroundColor: surfaceColor + '14',
-                  color: primaryColor,
-                  border: `2px solid ${primaryColor}3D`
-                }}
-                placeholder="0-360"
-              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => adjustHue(-15)}
+                  className="px-3 py-2 rounded-2xl text-sm font-medium transition-opacity"
+                  style={{
+                    backgroundColor: secondaryColor + '14',
+                    color: primaryColor,
+                    border: `2px solid ${primaryColor}3D`,
+                    minWidth: '40px'
+                  }}
+                  onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
+                  onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '14'}
+                >
+                  -15
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  max="360"
+                  value={baseHueInput}
+                  onChange={(e) => setBaseHueInput(e.target.value)}
+                  onBlur={(e) => commitHueChange((e.target as HTMLInputElement).value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      commitHueChange((e.target as HTMLInputElement).value);
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                  className="flex-1 px-3 py-2 rounded-2xl focus:outline-none"
+                  style={{
+                    backgroundColor: surfaceColor + '14',
+                    color: primaryColor,
+                    border: `2px solid ${primaryColor}3D`
+                  }}
+                  placeholder="0-360"
+                />
+                <button
+                  onClick={() => adjustHue(15)}
+                  className="px-3 py-2 rounded-2xl text-sm font-medium transition-opacity"
+                  style={{
+                    backgroundColor: secondaryColor + '14',
+                    color: primaryColor,
+                    border: `2px solid ${primaryColor}3D`,
+                    minWidth: '40px'
+                  }}
+                  onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
+                  onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '14'}
+                >
+                  +15
+                </button>
+              </div>
               <div className="text-sm mt-1 font-mono" style={{ color: getThemeTextColor(baseColor + 'A6', accentColor) }}>0-360 degrees</div>
             </div>
             
