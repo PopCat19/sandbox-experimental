@@ -98,24 +98,33 @@ function ColorSwatch({ label, l, c, h, opacity = 100, baseHue, primary: _ }: Col
   
   return (
     <div 
-      className="flex items-center gap-2 p-2 rounded-2xl transition-colors"
+      className="flex items-center gap-2"
       style={{
+        padding: '0.5rem',
+        borderRadius: '0.5rem',
+        transition: 'colors 0.2s ease',
         '--hover-bg': hoverHex + '14'
       } as React.CSSProperties}
       onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--hover-bg)'}
       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
     >
       <div 
-        className="w-12 h-12 rounded-2xl flex-shrink-0 relative"
+        className="flex-shrink-0 relative"
         style={{ 
+          width: '3rem',
+          height: '3rem',
+          borderRadius: '0.5rem',
           backgroundColor: hex,
           opacity: opacity / 100,
           border: `2px solid ${getContrastColor(hex) === '#FFFFFF' ? '#FFFFFF33' : '#00000033'}`
         }}
       >
         <div 
-          className="absolute inset-0 flex items-center justify-center text-xs font-mono"
-          style={{ color: getContrastColor(hex) }}
+          className="absolute inset-0 flex items-center justify-center font-mono"
+          style={{ 
+            fontSize: '0.75rem',
+            color: getContrastColor(hex) 
+          }}
         >
           {Math.round(opacity)}%
         </div>
@@ -308,40 +317,72 @@ export default function PMDColorConverter() {
   
   return (
     <div 
-      className="min-h-screen p-4"
-      style={{ backgroundColor: baseColor }}
+      className="min-h-screen"
+      style={{ 
+        backgroundColor: baseColor,
+        padding: '1rem'
+      }}
     >
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div 
-          className="rounded-2xl p-6 mb-6"
           style={{ 
             backgroundColor: baseColor + 'A6',
             backdropFilter: 'blur(24px)',
-            border: `2px solid ${primaryColor}3D`
+            border: `2px solid ${primaryColor}3D`,
+            borderRadius: '1rem',
+            padding: '1.5rem',
+            marginBottom: '1.5rem'
           }}
         >
-          <h1 className="text-2xl font-bold mb-2 font-fredoka" style={{ color: primaryColor }}>
+          <h1 
+            className="font-fredoka" 
+            style={{ 
+              color: primaryColor,
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '0.5rem'
+            }}
+          >
             PMD OKLCH Color Converter
           </h1>
-          <p className="text-sm mb-4 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
+          <p 
+            className="font-medium" 
+            style={{ 
+              color: getThemeTextColor(baseColor + 'A6'),
+              fontSize: '0.875rem',
+              marginBottom: '1rem'
+            }}
+          >
             Visualize your Project Minimalist Design palette with OKLCH values
           </p>
           
-          <div className="flex gap-4 mb-4">
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-2 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
+              <label 
+                className="block font-medium" 
+                style={{ 
+                  color: getThemeTextColor(baseColor + 'A6'),
+                  fontSize: '0.875rem',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500'
+                }}
+              >
                 Base Hue (degrees)
               </label>
               <div className="flex gap-2">
                 <button
                   onClick={() => adjustHue(-15)}
-                  className="px-3 py-2 rounded-2xl text-sm font-medium transition-opacity"
+                  className="font-medium"
                   style={{
                     backgroundColor: secondaryColor + '14',
                     color: primaryColor,
                     border: `2px solid ${primaryColor}3D`,
-                    minWidth: '40px'
+                    minWidth: '2.5rem',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    transition: 'opacity 0.2s ease'
                   }}
                   onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
                   onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '14'}
@@ -361,22 +402,30 @@ export default function PMDColorConverter() {
                       (e.target as HTMLInputElement).blur();
                     }
                   }}
-                  className="flex-1 px-3 py-2 rounded-2xl focus:outline-none"
+                  className="flex-1"
                   style={{
                     backgroundColor: surfaceColor + '14',
                     color: primaryColor,
-                    border: `2px solid ${primaryColor}3D`
+                    border: `2px solid ${primaryColor}3D`,
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    outline: 'none'
                   }}
                   placeholder="0-360"
                 />
                 <button
                   onClick={() => adjustHue(15)}
-                  className="px-3 py-2 rounded-2xl text-sm font-medium transition-opacity"
+                  className="font-medium"
                   style={{
                     backgroundColor: secondaryColor + '14',
                     color: primaryColor,
                     border: `2px solid ${primaryColor}3D`,
-                    minWidth: '40px'
+                    minWidth: '2.5rem',
+                    padding: '0.5rem 0.75rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    transition: 'opacity 0.2s ease'
                   }}
                   onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '20'}
                   onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = secondaryColor + '14'}
@@ -388,7 +437,15 @@ export default function PMDColorConverter() {
             </div>
             
             <div className="flex-1">
-              <label className="block text-sm font-medium mb-2 font-medium" style={{ color: getThemeTextColor(baseColor + 'A6') }}>
+              <label 
+                className="block font-medium" 
+                style={{ 
+                  color: getThemeTextColor(baseColor + 'A6'),
+                  fontSize: '0.875rem',
+                  marginBottom: '0.5rem',
+                  fontWeight: '500'
+                }}
+              >
                 Aux Hue Offset (degrees)
               </label>
               <input
@@ -404,11 +461,15 @@ export default function PMDColorConverter() {
                     (e.target as HTMLInputElement).blur();
                   }
                 }}
-                className="w-full px-3 py-2 rounded-2xl focus:outline-none"
+                className="w-full"
                 style={{
                   backgroundColor: surfaceColor + '14',
                   color: primaryColor,
-                  border: `2px solid ${primaryColor}3D`
+                  border: `2px solid ${primaryColor}3D`,
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '0.5rem',
+                  fontSize: '0.875rem',
+                  outline: 'none'
                 }}
                 placeholder="0-360"
               />
