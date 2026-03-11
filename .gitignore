@@ -1,0 +1,14 @@
+# Build artifacts
+/target/
+
+# Nix
+/result
+/result-*
+
+# Editor
+/.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
