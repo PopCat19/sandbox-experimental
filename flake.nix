@@ -66,6 +66,14 @@
         jq -r '[.channels[].instruments[].effects[]?] | group_by(.) | sort_by(-length) | .[] | "\(.[0]): \(length)"' "$FILE"
 
         echo ""
+        echo "--- Unused Patterns ---"
+        jq -r '[.channels | to_entries[] | {
+            channel: .key,
+            total: (.value.patterns | length),
+            used: ([.value.sequence[] | select(. != null)] | unique)
+          }] | .[] | "Channel \(.channel): \(.total) total, \(.used | length) used, \(.total - (.used | length)) unused"' "$FILE"
+
+        echo ""
         echo "--- String Frequency (top 30) ---"
         echo "Empty strings: $(jq -r '.. | strings | select(length == 0)' "$FILE" | wc -l)"
         jq -r '.. | strings | select(length > 0) | select(. != "null")' "$FILE" | sort | uniq -c | sort -rn | head -30 | awk '{print $2 ": " $1}'
