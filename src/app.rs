@@ -5,6 +5,7 @@
 use crate::data::JummBoxFile;
 use crate::ui::render_ui;
 use color_eyre::Result;
+use log::{debug, info, warn};
 use ratatui::{
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
     DefaultTerminal, Frame,
@@ -69,17 +70,23 @@ impl App {
     }
 
     fn handle_main_input(&mut self, key_code: KeyCode) {
+        debug!("main input: {:?}", key_code);
         match key_code {
             KeyCode::Char('e') => {
+                info!("entering edit mode for file path");
                 self.current_screen = CurrentScreen::Editing;
                 self.currently_editing = Some(EditingField::FilePath);
             }
             KeyCode::Char('f') => {
+                info!("entering edit mode for filter query");
                 self.current_screen = CurrentScreen::Editing;
                 self.currently_editing = Some(EditingField::FilterQuery);
             }
             KeyCode::Char('l') => self.load_file(),
-            KeyCode::Char('q') => self.current_screen = CurrentScreen::Exiting,
+            KeyCode::Char('q') => {
+                info!("requesting exit");
+                self.current_screen = CurrentScreen::Exiting;
+            }
             KeyCode::Up => self.scroll_up(),
             KeyCode::Down => self.scroll_down(),
             _ => {}
@@ -87,10 +94,12 @@ impl App {
     }
 
     fn handle_editing_input(&mut self, key_code: KeyCode) {
+        debug!("editing input: {:?}", key_code);
         match key_code {
             KeyCode::Enter => self.save_editing(),
             KeyCode::Backspace => self.delete_char(),
             KeyCode::Esc => {
+                info!("canceling edit mode");
                 self.current_screen = CurrentScreen::Main;
                 self.currently_editing = None;
             }
@@ -101,9 +110,14 @@ impl App {
     }
 
     fn handle_exiting_input(&mut self, key_code: KeyCode) -> bool {
+        debug!("exit input: {:?}", key_code);
         match key_code {
-            KeyCode::Char('y') => true,
+            KeyCode::Char('y') => {
+                info!("user confirmed exit");
+                true
+            }
             KeyCode::Char('n') | KeyCode::Char('q') => {
+                info!("user canceled exit");
                 self.current_screen = CurrentScreen::Main;
                 false
             }
@@ -163,12 +177,19 @@ impl App {
     }
 
     fn load_file(&mut self) {
+        info!("loading file: {}", self.file_path);
         match JummBoxFile::from_file(&self.file_path) {
             Ok(data) => {
+                info!(
+                    "file loaded: {} channels, {} notes",
+                    data.channel_count(),
+                    data.total_notes()
+                );
                 self.data = Some(data);
                 self.error_message = None;
             }
             Err(e) => {
+                warn!("failed to load file: {}", e);
                 self.error_message = Some(format!("Failed to load: {}", e));
             }
         }

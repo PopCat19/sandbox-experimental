@@ -2,6 +2,7 @@
 //
 // Purpose: JummBox JSON data structures
 
+use log::debug;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -44,8 +45,11 @@ pub struct NotePoint {
 
 impl JummBoxFile {
     pub fn from_file(path: &str) -> color_eyre::Result<Self> {
+        debug!("reading file: {}", path);
         let content = std::fs::read_to_string(path)?;
+        debug!("parsing json, {} bytes", content.len());
         let data: Self = serde_json::from_str(&content)?;
+        debug!("parsed {} channels", data.channels.len());
         Ok(data)
     }
 
