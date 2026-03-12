@@ -55,11 +55,33 @@ jummbox_count_note_properties() {
     ' "$file"
 }
 
-# Get pitch frequency distribution
+# Get individual pitch value frequency (first pitch of each note)
 jummbox_count_pitches() {
 	local file="$1"
 	local limit="${2:-20}"
-	jq -r "[.channels[].patterns[].notes[].pitches[]] | group_by(.) | sort_by(-length) | .[0:$limit][] | \"\(.): \(length)\"" "$file"
+	jq -r "[.channels[].patterns[].notes[] | .pitches[0]] | map(select(. != null)) | group_by(.) | sort_by(-length) | .[0:$limit][] | \"\(.): \(length)\"" "$file"
+}
+
+# Get pitch distribution per channel
+jummbox_count_pitches_per_channel() {
+	local file="$1"
+	jq -r '
+		[.channels | to_entries[] | {
+			channel: .key,
+			pitches: [.value.patterns[].notes[] | .pitches[0]]
+		}][] | "\(.channel): " + ([.pitches | map(select(. != null)) | group_by(.) | sort_by(-length) | .[0:5][] | "\(.)x\(length)"] | join(", "))
+	' "$file"
+}
+
+# Get note count per pattern per channel
+jummbox_analyze_pattern_density() {
+	local file="$1"
+	jq -r '
+		.channels | to_entries[] | .key as $ch |
+		.value.patterns | to_entries[] | .key as $pat |
+		select(.value.notes != null and (.value.notes | length) > 0) |
+		"Channel \($ch) Pattern \($pat): \(.value.notes | length) notes"
+	' "$file" 2>/dev/null | head -50 || echo "(Error analyzing pattern density)"
 }
 
 # Count effects
@@ -199,6 +221,14 @@ jummbox_analyze() {
 	echo ""
 	echo "--- Pitch Frequency (top 20) ---"
 	jummbox_count_pitches "$file" 20
+
+	echo ""
+	echo "--- Pitch Distribution per Channel (top 5 per channel) ---"
+	jummbox_count_pitches_per_channel "$file"
+
+	echo ""
+	echo "--- Non-Empty Pattern Density (top 50) ---"
+	jummbox_analyze_pattern_density "$file"
 
 	echo ""
 	echo "--- Effect Counts ---"
