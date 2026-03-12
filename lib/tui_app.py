@@ -225,47 +225,5 @@ class SlarmoosboxTuiApp(App[None]):
         tree.focus()
 
     def action_go_input(self) -> None:
-        def on_submit(path: str) -> None:
-            p = Path(path).expanduser()
-            if p.exists():
-                if p.is_file():
-                    self.state.current_path = p.parent
-                    tree = self.query_one("#file-tree", DirectoryTree)
-                    tree.path = str(p.parent)
-                    self.selected_path = p
-                else:
-                    self.state.current_path = p
-                    tree = self.query_one("#file-tree", DirectoryTree)
-                    tree.path = str(p)
-                self._refresh_view()
-            self.app.pop_screen()
-
-        from textual.binding import Binding
-        from textual.widgets import Input
-        from textual.widgets import Label
-        from textual.screen import ModalScreen
-
-        class PathInput(ModalScreen[None]):
-            BINDINGS = [
-                Binding("escape", "cancel", "Cancel"),
-                Binding("enter", "submit", "Submit"),
-            ]
-
-            def compose(self):
-                yield Label("Enter path:")
-                yield Input(placeholder="/home/user/...", id="path-input")
-
-            def on_mount(self) -> None:
-                self.query_one("#path-input", Input).focus()
-
-            def on_input_submit(self, event: Input.Submit) -> None:
-                on_submit(event.value)
-
-            def action_submit(self) -> None:
-                input_widget = self.query_one("#path-input", Input)
-                on_submit(input_widget.value)
-
-            def action_cancel(self) -> None:
-                self.app.pop_screen()
-
-        self.push_screen(PathInput())
+        # Path input temporarily disabled - use ~ for home and h to navigate
+        self.notify("Use ~ for home, h/l to navigate directories")
