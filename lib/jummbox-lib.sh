@@ -127,6 +127,51 @@ jummbox_find_unused_patterns() {
       }] | .[] | "Channel \(.channel): \(.total) total, \(.used | length) used, \(.total - (.used | length)) unused"' "$file"
 }
 
+# Analyze allocated (non-empty) patterns per channel
+jummbox_analyze_allocated_patterns() {
+	local file="$1"
+	local ticksPerBeat=$(jq -r '.ticksPerBeat' "$file")
+	local beatsPerBar=$(jq -r '.beatsPerBar' "$file")
+	local patternLength=$((ticksPerBeat * beatsPerBar * 4))
+
+	jq -r --argjson plen "$patternLength" '
+	[.channels | to_entries[] | .key as $ch |
+	.value.patterns | to_entries[] | .key as $pat |
+	{
+		ch: $ch,
+		pat: $pat,
+		notes: (.value.notes | length),
+		ticks: ([.value.notes[].points[].tick | select(. < "$plen")] | unique | length)
+	}] | .[] | select(.notes > 0) | "Channel \(.ch) Pattern \(.pat): \(.notes) notes, \(.ticks) ticks used of \(plen)"
+	' "$file" 2>/dev/null | head -50 || echo "(Error analyzing allocated patterns)"
+}
+
+# Analyze pattern defragmentation (gap analysis)
+jummbox_analyze_defragmentation() {
+	local file="$1"
+	local ticksPerBeat=$(jq -r '.ticksPerBeat' "$file")
+	local beatsPerBar=$(jq -r '.beatsPerBar' "$file")
+	local patternLength=$((ticksPerBeat * beatsPerBar * 4))
+
+	jq -r --argjson plen "$patternLength" '
+	[.channels | to_entries[] | .key as $ch |
+	.value.patterns | to_entries[] | .key as $pat |
+	{
+		ch: $ch,
+		pat: $pat,
+		notes: (.value.notes | length),
+		ticks: ([.value.notes[].points[].tick | select(. < $plen)] | sort),
+	}] | .[] | select(.notes > 0) | .ticks as $t | {
+		ch: .ch,
+		pat: .pat,
+		notes: .notes,
+		tickCount: ($t | length),
+		range: (if ($t | length) > 0 then "\($t | min)-\($t | max)" else "none" end),
+		density: (if $plen > 0 then (($t | length) * 100 / $plen) | floor else 0 end)
+	} | "Channel \(.ch) Pattern \(.pat): \(.notes) notes, \(.tickCount) ticks, range \(.range), density \(.density)%"
+	' "$file" 2>/dev/null | head -50 || echo "(Error analyzing defragmentation)"
+}
+
 # Get string frequency (for debugging)
 jummbox_count_strings() {
 	local file="$1"
@@ -264,6 +309,14 @@ jummbox_analyze() {
 	echo ""
 	echo "--- Unused Patterns ---"
 	jummbox_find_unused_patterns "$file"
+
+	echo ""
+	echo "--- Allocated (Non-Empty) Patterns ---"
+	jummbox_analyze_allocated_patterns "$file"
+
+	echo ""
+	echo "--- Pattern Defragmentation ---"
+	jummbox_analyze_defragmentation "$file"
 
 	echo ""
 	echo "--- String Frequency (top 30) ---"
