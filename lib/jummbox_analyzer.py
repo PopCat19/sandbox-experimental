@@ -73,6 +73,7 @@ class DuplicatePatternGroup:
 @dataclass(frozen=True)
 class CleanupCandidateCounts:
     unused_patterns: int
+    stale_patterns: int
     duplicate_pattern_groups: int
     invalid_sequence_refs: int
     empty_used_patterns: int
@@ -189,6 +190,7 @@ def analyze_file(
     invalid_sequence_ref_count = 0
     empty_used_pattern_count = 0
     sparse_used_pattern_count = 0
+    stale_pattern_count = 0
     empty_channel_count = 0
 
     for channel_index, channel in enumerate(channels):
@@ -356,10 +358,11 @@ def analyze_file(
                         )
                     )
             else:
+                stale_pattern_count += 1
                 lint_findings.append(
                     LintFinding(
-                        code="unused-pattern",
-                        message="Pattern is allocated but never referenced",
+                        code="stale-pattern",
+                        message="Pattern has content but is not referenced in sequence",
                         channel=channel_index,
                         pattern=pattern_index,
                     )
@@ -401,6 +404,7 @@ def analyze_file(
 
     cleanup_candidate_counts = CleanupCandidateCounts(
         unused_patterns=unused_pattern_total,
+        stale_patterns=stale_pattern_count,
         duplicate_pattern_groups=len(duplicate_pattern_groups),
         invalid_sequence_refs=invalid_sequence_ref_count,
         empty_used_patterns=empty_used_pattern_count,
@@ -805,7 +809,8 @@ def format_cleanup_candidates(report: AnalysisReport) -> list[str]:
     counts = report.cleanup_candidate_counts
     return [
         "--- Cleanup Candidates ---",
-        f"Unused patterns: {counts.unused_patterns}",
+        f"Unused patterns (empty, not referenced): {counts.unused_patterns}",
+        f"Stale patterns (has content, not referenced): {counts.stale_patterns}",
         f"Duplicate pattern groups: {counts.duplicate_pattern_groups}",
         f"Invalid sequence refs: {counts.invalid_sequence_refs}",
         f"Empty used patterns: {counts.empty_used_patterns}",
