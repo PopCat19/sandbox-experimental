@@ -39,7 +39,9 @@ pub struct Note {
 #[derive(Debug, Deserialize, Clone)]
 pub struct NotePoint {
     pub volume: i32,
+    #[serde(rename = "pitchBend")]
     pub pitch_bend: i32,
+    #[serde(rename = "forMod")]
     pub for_mod: bool,
 }
 
