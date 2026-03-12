@@ -7,6 +7,29 @@
 # - Provides jq-based analysis functions
 # - Offers editing utilities for JummBox JSON manipulation
 
+# Convert MIDI note number to 12TET note name
+jummbox_pitch_to_name() {
+	local pitch="$1"
+	local octave=$((pitch / 12 - 1))
+	local n=$((pitch % 12))
+	local note
+	case "$n" in
+		0) note="C" ;;
+		1) note="C#" ;;
+		2) note="D" ;;
+		3) note="D#" ;;
+		4) note="E" ;;
+		5) note="F" ;;
+		6) note="F#" ;;
+		7) note="G" ;;
+		8) note="G#" ;;
+		9) note="A" ;;
+		10) note="A#" ;;
+		11) note="B" ;;
+	esac
+	echo "${note}${octave}"
+}
+
 # Validate that a JummBox JSON file exists and is valid
 jummbox_validate() {
 	local file="$1"
@@ -55,11 +78,15 @@ jummbox_count_note_properties() {
     ' "$file"
 }
 
-# Get individual pitch value frequency (first pitch of each note)
+# Get pitch frequency with 12TET note names
 jummbox_count_pitches() {
 	local file="$1"
 	local limit="${2:-20}"
-	jq -r "[.channels[].patterns[].notes[] | .pitches[0]] | map(select(. != null)) | group_by(.) | sort_by(-length) | .[0:$limit][] | \"\(.): \(length)\"" "$file"
+
+	jq -r "[.channels[].patterns[].notes[].pitches[]] | group_by(.) | map({pitch: .[0], cnt: length}) | sort_by(-.cnt) | .[0:$limit][] | \"\(.pitch): \(.cnt)\"" "$file" | while IFS=: read -r pitch count; do
+		name=$(jummbox_pitch_to_name "$pitch")
+		echo "$name ($pitch): $count"
+	done
 }
 
 # Get pitch distribution per channel
@@ -68,7 +95,7 @@ jummbox_count_pitches_per_channel() {
 	jq -r '
 		[.channels | to_entries[] | {
 			channel: .key,
-			pitches: [.value.patterns[].notes[] | .pitches[0]]
+			pitches: [.value.patterns[].notes[] | .pitches[]]
 		}][] | "\(.channel): " + ([.pitches | map(select(. != null)) | group_by(.) | sort_by(-length) | .[0:5][] | "\(.)x\(length)"] | join(", "))
 	' "$file"
 }
