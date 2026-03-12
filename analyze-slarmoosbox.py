@@ -27,6 +27,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="analyze-slarmoosbox.py",
         description="Analyze and lint JummBox JSON files",
+        epilog="""
+Examples:
+  %(prog)s file.json                    # Run full analysis (default)
+  %(prog)s file.json analyze            # Explicit analyze subcommand
+  %(prog)s file.json summary            # Compact summary
+  %(prog)s file.json lint               # Show lint findings
+  %(prog)s file.json --json             # JSON output
+  %(prog)s file.json --section health   # Show only health section
+  %(prog)s file.json --channel 7        # Limit to channel 7
+  %(prog)s --help                       # Show this help
+        """.strip(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="command", required=False)
 
@@ -122,6 +134,13 @@ def resolve_input_path(file_arg: str | None) -> Path:
 
 def main() -> int:
     parser = build_parser()
+
+    # Pre-process to allow: script.py file.json (without subcommand)
+    raw = sys.argv[1:]
+    if raw and not raw[0].startswith("-") and not raw[0] in ("analyze", "summary", "lint"):
+        # Insert "analyze" as default subcommand
+        sys.argv.insert(1, "analyze")
+
     args = parser.parse_args()
 
     command = args.command or "analyze"
