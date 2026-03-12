@@ -15,6 +15,7 @@ use ratatui::{
 pub enum CurrentScreen {
     Main,
     Editing,
+    FilePicker,
     Exiting,
 }
 
@@ -29,6 +30,7 @@ pub struct App {
     pub currently_editing: Option<EditingField>,
     pub file_path: String,
     pub filter_query: String,
+    pub cursor_position: usize,
     pub data: Option<JummBoxFile>,
     pub error_message: Option<String>,
     pub scroll_offset: usize,
@@ -41,6 +43,7 @@ impl App {
             currently_editing: None,
             file_path: String::from("./slarmoosbox.json"),
             filter_query: String::new(),
+            cursor_position: 0,
             data: None,
             error_message: None,
             scroll_offset: 0,
@@ -59,6 +62,7 @@ impl App {
                 match self.current_screen {
                     CurrentScreen::Main => self.handle_main_input(key.code),
                     CurrentScreen::Editing => self.handle_editing_input(key.code),
+                    CurrentScreen::FilePicker => self.handle_file_picker_input(key.code),
                     CurrentScreen::Exiting => {
                         if self.handle_exiting_input(key.code) {
                             return Ok(());
@@ -104,6 +108,14 @@ impl App {
                 self.currently_editing = None;
             }
             KeyCode::Tab => self.toggle_editing(),
+            // Vim keys: h=left, j=down, k=up, l=right
+            KeyCode::Char('h') => self.move_cursor_left(),
+            KeyCode::Char('j') => self.move_cursor_down(),
+            KeyCode::Char('k') => self.move_cursor_up(),
+            KeyCode::Char('l') => self.move_cursor_right(),
+            // Arrow keys also supported
+            KeyCode::Left => self.move_cursor_left(),
+            KeyCode::Right => self.move_cursor_right(),
             KeyCode::Char(c) => self.enter_char(c),
             _ => {}
         }
@@ -178,6 +190,13 @@ impl App {
 
     fn load_file(&mut self) {
         info!("loading file: {}", self.file_path);
+        // Check if file exists, if not open file picker
+        if !std::path::Path::new(&self.file_path).exists() {
+            warn!("file does not exist, opening file picker");
+            self.current_screen = CurrentScreen::FilePicker;
+            self.cursor_position = self.file_path.len();
+            return;
+        }
         match JummBoxFile::from_file(&self.file_path) {
             Ok(data) => {
                 info!(
@@ -193,6 +212,61 @@ impl App {
                 self.error_message = Some(format!("Failed to load: {}", e));
             }
         }
+    }
+
+    fn handle_file_picker_input(&mut self, key_code: KeyCode) {
+        debug!("file picker input: {:?}", key_code);
+        match key_code {
+            KeyCode::Enter => {
+                info!("file picker: attempting to load file");
+                self.current_screen = CurrentScreen::Main;
+                self.load_file();
+            }
+            KeyCode::Esc => {
+                info!("file picker: canceling");
+                self.current_screen = CurrentScreen::Main;
+            }
+            KeyCode::Backspace => {
+                self.file_path.pop();
+                self.cursor_position = self.cursor_position.saturating_sub(1);
+            }
+            // Vim keys
+            KeyCode::Char('h') => self.move_cursor_left(),
+            KeyCode::Char('j') => self.move_cursor_down(),
+            KeyCode::Char('k') => self.move_cursor_up(),
+            KeyCode::Char('l') => self.move_cursor_right(),
+            KeyCode::Char('/') => {
+                self.current_screen = CurrentScreen::Editing;
+                self.currently_editing = Some(EditingField::FilePath);
+            }
+            // Arrow keys
+            KeyCode::Left => self.move_cursor_left(),
+            KeyCode::Right => self.move_cursor_right(),
+            KeyCode::Char(c) => {
+                self.file_path.push(c);
+                self.cursor_position += 1;
+            }
+            _ => {}
+        }
+    }
+
+    fn move_cursor_left(&mut self) {
+        self.cursor_position = self.cursor_position.saturating_sub(1);
+    }
+
+    fn move_cursor_right(&mut self) {
+        let max_pos = self.file_path.len();
+        if self.cursor_position < max_pos {
+            self.cursor_position += 1;
+        }
+    }
+
+    fn move_cursor_up(&mut self) {
+        self.scroll_up();
+    }
+
+    fn move_cursor_down(&mut self) {
+        self.scroll_down();
     }
 
     fn scroll_up(&mut self) {

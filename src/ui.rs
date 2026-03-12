@@ -30,6 +30,10 @@ pub fn render_ui(frame: &mut Frame, app: &App) {
             render_editing_header(frame, app, chunks[0]);
             render_editing_content(frame, app, chunks[1]);
         }
+        CurrentScreen::FilePicker => {
+            render_file_picker_header(frame, chunks[0]);
+            render_file_picker_content(frame, app, chunks[1]);
+        }
         CurrentScreen::Exiting => {
             render_header(frame, app, chunks[0]);
             render_exit_dialog(frame, chunks[1]);
@@ -54,6 +58,15 @@ fn render_editing_header(frame: &mut Frame, _app: &App, area: Rect) {
         .borders(Borders::ALL)
         .title(title)
         .title_style(Style::default().fg(Color::Yellow).bold());
+    frame.render_widget(block, area);
+}
+
+fn render_file_picker_header(frame: &mut Frame, area: Rect) {
+    let title = Line::from("File Picker").centered();
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .title(title)
+        .title_style(Style::default().fg(Color::Magenta).bold());
     frame.render_widget(block, area);
 }
 
@@ -101,6 +114,15 @@ fn render_editing_content(frame: &mut Frame, app: &App, area: Rect) {
         .style(filter_style);
     let filter_para = Paragraph::new(app.filter_query.as_str()).block(filter_block);
     frame.render_widget(filter_para, chunks[1]);
+}
+
+fn render_file_picker_content(frame: &mut Frame, app: &App, area: Rect) {
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .title("Enter file path")
+        .style(Style::default().fg(Color::Magenta));
+    let para = Paragraph::new(app.file_path.as_str()).block(block);
+    frame.render_widget(para, area);
 }
 
 fn render_error(frame: &mut Frame, error: &str, area: Rect) {
@@ -209,7 +231,8 @@ fn render_exit_dialog(frame: &mut Frame, area: Rect) {
 fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     let help_text = match app.current_screen {
         CurrentScreen::Main => "[e]dit path  [f]ilter  [l]oad  [q]uit  ↑↓ scroll",
-        CurrentScreen::Editing => "[Enter] save  [Tab] switch field  [Esc] cancel",
+        CurrentScreen::Editing => "[Enter] save  [Tab] switch field  [Esc] cancel  vim: h/j/k/l",
+        CurrentScreen::FilePicker => "[Enter] load  [Esc] cancel  [/] edit path  vim: h/j/k/l",
         CurrentScreen::Exiting => "[y]es  [n]o",
     };
 
