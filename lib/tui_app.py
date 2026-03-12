@@ -146,7 +146,11 @@ class SlarmoosboxTuiApp(App[None]):
         tree = self.query_one("#file-tree", DirectoryTree)
         node = tree.cursor_node
         if node is not None and node.parent is not None:
-            tree.action_select_parent()
+            parent_path = node.parent.data.path
+            try:
+                tree.path = str(parent_path)
+            except Exception:
+                return
 
     def action_tree_select(self) -> None:
         tree = self.query_one("#file-tree", DirectoryTree)
