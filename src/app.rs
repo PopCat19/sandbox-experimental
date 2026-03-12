@@ -77,9 +77,8 @@ impl App {
         debug!("main input: {:?}", key_code);
         match key_code {
             KeyCode::Char('e') => {
-                info!("entering edit mode for file path");
-                self.current_screen = CurrentScreen::Editing;
-                self.currently_editing = Some(EditingField::FilePath);
+                info!("opening editor for path entry");
+                self.open_editor_for_path();
             }
             KeyCode::Char('f') => {
                 info!("entering edit mode for filter query");
@@ -275,6 +274,51 @@ impl App {
 
     fn scroll_down(&mut self) {
         self.scroll_offset = self.scroll_offset.saturating_add(1);
+    }
+
+    fn open_editor_for_path(&mut self) {
+        // Create a temp file with the current path
+        let temp_path = std::env::temp_dir().join("slarmoosbox_path.txt");
+        if let Err(e) = std::fs::write(&temp_path, &self.file_path) {
+            warn!("failed to write temp file: {}", e);
+            return;
+        }
+
+        // Get editor from env or use default
+        let editor = std::env::var("EDITOR").unwrap_or_else(|_| "vi".to_string());
+        info!("opening editor: {} {}", editor, temp_path.display());
+
+        // Open editor
+        let result = std::process::Command::new(&editor)
+            .arg(&temp_path)
+            .status();
+
+        match result {
+            Ok(status) if status.success() => {
+                // Read back the path
+                match std::fs::read_to_string(&temp_path) {
+                    Ok(content) => {
+                        let new_path = content.trim().to_string();
+                        if !new_path.is_empty() {
+                            self.file_path = new_path;
+                            info!("path updated from editor");
+                        }
+                    }
+                    Err(e) => {
+                        warn!("failed to read temp file: {}", e);
+                    }
+                }
+            }
+            Ok(status) => {
+                warn!("editor exited with status: {:?}", status);
+            }
+            Err(e) => {
+                warn!("failed to open editor: {}", e);
+            }
+        }
+
+        // Clean up temp file
+        let _ = std::fs::remove_file(&temp_path);
     }
 
     fn draw(&self, frame: &mut Frame) {
