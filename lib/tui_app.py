@@ -44,10 +44,14 @@ class SlarmoosboxTuiApp(App[None]):
         Binding("q", "quit", "Quit"),
         Binding("enter", "open_selected", "Analyze"),
         Binding("m", "cycle_mode", "Mode"),
+        Binding("M", "cycle_mode_reverse", "Mode rev"),
         Binding("s", "cycle_section", "Section"),
+        Binding("S", "cycle_section_reverse", "Section rev"),
         Binding("r", "reload_view", "Reload"),
         Binding("]", "channel_up", "Channel +"),
         Binding("[", "channel_down", "Channel -"),
+        Binding("}", "channel_up", "Channel +"),
+        Binding("{", "channel_down", "Channel -"),
         Binding("c", "clear_channel", "Clear channel"),
         Binding("home", "go_root", "Root"),
         Binding("~", "go_home", "Home"),
@@ -179,8 +183,16 @@ class SlarmoosboxTuiApp(App[None]):
         self.state.cycle_mode()
         self._refresh_view()
 
+    def action_cycle_mode_reverse(self) -> None:
+        self.state.cycle_mode_reverse()
+        self._refresh_view()
+
     def action_cycle_section(self) -> None:
         self.state.cycle_section()
+        self._refresh_view()
+
+    def action_cycle_section_reverse(self) -> None:
+        self.state.cycle_section_reverse()
         self._refresh_view()
 
     def action_reload_view(self) -> None:

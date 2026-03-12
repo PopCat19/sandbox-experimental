@@ -56,6 +56,13 @@ class ViewState:
         if self.mode != "analyze":
             self.section = None
 
+    def cycle_mode_reverse(self) -> None:
+        current_index = REPORT_MODES.index(self.mode)
+        prev_index = (current_index - 1) % len(REPORT_MODES)
+        self.mode = REPORT_MODES[prev_index]
+        if self.mode != "analyze":
+            self.section = None
+
     def cycle_section(self) -> None:
         if self.mode != "analyze":
             return
@@ -72,6 +79,23 @@ class ViewState:
             return
 
         self.section = ANALYZE_SECTIONS[next_index]
+
+    def cycle_section_reverse(self) -> None:
+        if self.mode != "analyze":
+            return
+
+        if self.section is None:
+            self.section = ANALYZE_SECTIONS[-1]
+            return
+
+        current_index = ANALYZE_SECTIONS.index(self.section)
+        prev_index = (current_index - 1)
+
+        if prev_index < 0:
+            self.section = None
+            return
+
+        self.section = ANALYZE_SECTIONS[prev_index]
 
     def clear_channel_filter(self) -> None:
         self.channel_filter = None
