@@ -1,10 +1,11 @@
 # flake.nix
 #
-# Purpose: Reproducible environment for JummBox analysis
+# Purpose: Provides a reproducible environment for JummBox analysis
 #
-# Usage:
-#   nix run .              # run analysis on default file
-#   nix run . -- <file>    # run analysis on specified file
+# This module:
+# - Defines a runnable analyzer package
+# - Exposes a Python dev shell
+# - Keeps the tool portable through Nix
 
 {
   description = "JummBox JSON analyzer";
@@ -16,28 +17,25 @@
   outputs =
     { nixpkgs, ... }:
     let
-      pkgs = import nixpkgs { system = "x86_64-linux"; };
+      system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
+      python = pkgs.python3;
     in
     {
-      packages.x86_64-linux.default = pkgs.writeScriptBin "analyze-slarmoosbox" ''
-        #!/usr/bin/env bash
-        set -euo pipefail
+      packages.${system}.default = pkgs.writeShellApplication {
+        name = "analyze-slarmoosbox";
+        runtimeInputs = [ python ];
+        text = ''
+          SCRIPT_DIR="$(pwd)"
+          exec ${python}/bin/python3 "$SCRIPT_DIR/analyze-slarmoosbox.py" "$@"
+        '';
+      };
 
-        LIB_DIR="$(cd "$(dirname "''${BASH_SOURCE[0]}")/../lib" && pwd)"
-        source "''${LIB_DIR}/jummbox-lib.sh"
+      devShells.${system}.default = pkgs.mkShell {
+        packages = [
+          python
+        ];
 
-        FILE="''${1:-./slarmoosbox.json}"
-
-        if [[ ! -f "$FILE" ]]; then
-          echo "Error: File '$FILE' not found" >&2
-          exit 1
-        fi
-
-        jummbox_analyze "$FILE"
-      '';
-
-      devShells.x86_64-linux.default = pkgs.mkShell {
-        buildInputs = with pkgs; [ jq ];
         shellHook = ''
           export PS1="[slarmoosbox] $PS1"
         '';
