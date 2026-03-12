@@ -1,14 +1,14 @@
 # flake.nix
 #
-# Purpose: Provides a reproducible environment for JummBox analysis
+# Purpose: Provides reproducible environments for JummBox CLI and TUI tools
 #
 # This module:
-# - Defines a runnable analyzer package
-# - Exposes a Python dev shell
-# - Keeps the tool portable through Nix
+# - Defines runnable analyzer packages
+# - Exposes a Python dev shell with Textual
+# - Keeps the tools portable through Nix
 
 {
-  description = "JummBox JSON analyzer";
+  description = "JummBox JSON analyzer and TUI";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
@@ -19,7 +19,12 @@
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
-      python = pkgs.python3;
+
+      python = pkgs.python3.withPackages (
+        ps: with ps; [
+          textual
+        ]
+      );
     in
     {
       packages.${system}.default = pkgs.writeShellApplication {
@@ -28,6 +33,15 @@
         text = ''
           SCRIPT_DIR="$(pwd)"
           exec ${python}/bin/python3 "$SCRIPT_DIR/analyze-slarmoosbox.py" "$@"
+        '';
+      };
+
+      packages.${system}.tui = pkgs.writeShellApplication {
+        name = "slarmoosbox-tui";
+        runtimeInputs = [ python ];
+        text = ''
+          SCRIPT_DIR="$(pwd)"
+          exec ${python}/bin/python3 "$SCRIPT_DIR/slarmoosbox-tui.py" "$@"
         '';
       };
 

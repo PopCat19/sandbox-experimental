@@ -1,0 +1,32 @@
+Screen {
+    layout: vertical;
+}
+
+#app-shell {
+    height: 1fr;
+}
+
+#file-tree {
+    width: 36;
+    min-width: 24;
+    border: solid $accent;
+}
+
+#right-pane {
+    width: 1fr;
+    border: solid $panel;
+}
+
+#status-bar {
+    height: 3;
+    padding: 0 1;
+    background: $boost;
+    color: $text;
+    border-bottom: solid $panel-darken-2;
+}
+
+#report-view {
+    height: 1fr;
+    overflow: auto;
+    padding: 1;
+}
