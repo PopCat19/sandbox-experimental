@@ -240,16 +240,25 @@ class SlarmoosboxTuiApp(App[None]):
                 self._refresh_view()
             self.app.pop_screen()
 
+        from textual.binding import Binding
         from textual.widgets import Input
         from textual.widgets import Label
         from textual.screen import ModalScreen
 
         class PathInput(ModalScreen[None]):
+            BINDINGS = [Binding("escape", "cancel", "Cancel")]
+
             def compose(self):
                 yield Label("Enter path:")
                 yield Input(placeholder="/home/user/...")
 
+            def on_mount(self) -> None:
+                self.query_one(Input).focus()
+
             def on_input_submit(self, event: Input.Submit) -> None:
                 on_submit(event.value)
+
+            def action_cancel(self) -> None:
+                self.app.pop_screen()
 
         self.push_screen(PathInput())
