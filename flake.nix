@@ -16,17 +16,6 @@
   outputs = { self, nixpkgs }:
     let
       pkgs = import nixpkgs { system = "x86_64-linux"; };
-      lib-file = pkgs.fetchFromGitHub {
-        owner = "popcat19";
-        repo = "sandbox-experimental";
-        rev = "HEAD";
-        sha256 = "0000000000000000000000000000000000000000000000000000000000000000";
-      };
-      # For local development, use source, otherwise use fetch
-      jummbox-lib = pkgs.substituteAll {
-        src = ./lib;
-        libDir = "${lib}/jummbox-lib.sh";
-      };
     in
     {
       packages.x86_64-linux.default = pkgs.writeScriptBin "analyze-slarmoosbox" ''
