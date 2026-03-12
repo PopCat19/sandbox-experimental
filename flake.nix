@@ -17,8 +17,7 @@
   outputs =
     { nixpkgs, ... }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
+      pkgs = import nixpkgs { system = "x86_64-linux"; };
 
       python = pkgs.python3.withPackages (
         ps: with ps; [
@@ -27,25 +26,27 @@
       );
     in
     {
-      packages.${system}.default = pkgs.writeShellApplication {
-        name = "analyze-slarmoosbox";
-        runtimeInputs = [ python ];
-        text = ''
-          SCRIPT_DIR="$(pwd)"
-          exec ${python}/bin/python3 "$SCRIPT_DIR/analyze-slarmoosbox.py" "$@"
-        '';
+      packages.x86_64-linux = {
+        default = pkgs.writeShellApplication {
+          name = "analyze-slarmoosbox";
+          runtimeInputs = [ python ];
+          text = ''
+            SCRIPT_DIR="$(pwd)"
+            exec ${python}/bin/python3 "$SCRIPT_DIR/analyze-slarmoosbox.py" "$@"
+          '';
+        };
+
+        tui = pkgs.writeShellApplication {
+          name = "slarmoosbox-tui";
+          runtimeInputs = [ python ];
+          text = ''
+            SCRIPT_DIR="$(pwd)"
+            exec ${python}/bin/python3 "$SCRIPT_DIR/slarmoosbox-tui.py" "$@"
+          '';
+        };
       };
 
-      packages.${system}.tui = pkgs.writeShellApplication {
-        name = "slarmoosbox-tui";
-        runtimeInputs = [ python ];
-        text = ''
-          SCRIPT_DIR="$(pwd)"
-          exec ${python}/bin/python3 "$SCRIPT_DIR/slarmoosbox-tui.py" "$@"
-        '';
-      };
-
-      devShells.${system}.default = pkgs.mkShell {
+      devShells.x86_64-linux.default = pkgs.mkShell {
         packages = [
           python
         ];
