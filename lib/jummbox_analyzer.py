@@ -615,11 +615,11 @@ def format_report(report: AnalysisReport, section: str | None = None) -> str:
     )
     append_section(lines, "pattern-density", format_pattern_density(report), section)
     append_section(lines, "effects", format_effects(report), section)
-    append_section(lines, "unused-patterns", format_unused_patterns(report), section)
+    append_section(lines, "available-patterns", format_unused_patterns(report), section)
     append_section(
         lines,
-        "allocated-patterns",
-        format_allocated_patterns(report),
+        "non-empty-patterns",
+        format_non_empty_patterns(report),
         section,
     )
     append_section(
@@ -753,17 +753,16 @@ def format_effects(report: AnalysisReport) -> list[str]:
 
 
 def format_unused_patterns(report: AnalysisReport) -> list[str]:
-    lines = ["--- Unused Patterns ---"]
+    lines = ["--- Available Patterns per Channel ---"]
     for row in report.unused_pattern_rows:
         lines.append(
-            f"Channel {row.channel}: {row.total} total, {row.used} used, "
-            f"{row.unused} unused"
+            f"Channel {row.channel}: {row.total} available, {row.used} referenced in sequence, {row.unused} unreferenced"
         )
     return lines
 
 
-def format_allocated_patterns(report: AnalysisReport) -> list[str]:
-    lines = ["--- Allocated (Non-Empty) Patterns ---"]
+def format_non_empty_patterns(report: AnalysisReport) -> list[str]:
+    lines = ["--- Non-Empty Patterns ---"]
     if report.allocated_pattern_rows:
         for row in report.allocated_pattern_rows:
             lines.append(
@@ -852,7 +851,7 @@ def format_summary(report: AnalysisReport) -> str:
         f"Patterns: {report.pattern_count}",
         f"Notes: {report.note_count}",
         f"Empty patterns: {report.empty_pattern_count}",
-        f"Unused patterns: {counts.unused_patterns}",
+        f"Unreferenced patterns: {counts.unused_patterns}",
         f"Duplicate pattern groups: {counts.duplicate_pattern_groups}",
         f"Warnings: {len(report.lint_findings)}",
         f"Health: {report.health_summary.status}",
