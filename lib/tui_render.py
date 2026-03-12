@@ -35,6 +35,8 @@ def render_empty_state() -> str:
         "- Press s to cycle report section\n"
         "- Press [ or ] to change channel filter\n"
         "- Press c to clear channel filter\n"
+        "- Press / to input a path\n"
+        "- Press ~ to go home\n"
         "- Press r to reload\n"
         "- Press q to quit"
     )

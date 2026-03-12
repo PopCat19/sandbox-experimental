@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from textual.app import App
@@ -49,6 +50,8 @@ class SlarmoosboxTuiApp(App[None]):
         Binding("[", "channel_down", "Channel -"),
         Binding("c", "clear_channel", "Clear channel"),
         Binding("home", "go_root", "Root"),
+        Binding("~", "go_home", "Home"),
+        Binding("/", "go_input", "Input path"),
         # Vim-style navigation
         Binding("j", "tree_down", "Down"),
         Binding("k", "tree_up", "Up"),
@@ -200,3 +203,41 @@ class SlarmoosboxTuiApp(App[None]):
         tree.path = str(self.state.current_path)
         tree.reload()
         tree.focus()
+
+    def action_go_home(self) -> None:
+        home = Path(os.path.expanduser("~"))
+        self.state.current_path = home
+        tree = self.query_one("#file-tree", DirectoryTree)
+        tree.path = str(home)
+        tree.reload()
+        tree.focus()
+
+    def action_go_input(self) -> None:
+        def on_submit(path: str) -> None:
+            p = Path(path).expanduser()
+            if p.exists():
+                if p.is_file():
+                    self.state.current_path = p.parent
+                    tree = self.query_one("#file-tree", DirectoryTree)
+                    tree.path = str(p.parent)
+                    self.selected_path = p
+                else:
+                    self.state.current_path = p
+                    tree = self.query_one("#file-tree", DirectoryTree)
+                    tree.path = str(p)
+                self._refresh_view()
+            self.app.pop_screen()
+
+        from textual.widgets import Input
+        from textual.widgets import Label
+        from textual.screen import ModalScreen
+
+        class PathInput(ModalScreen[None]):
+            def compose(self):
+                yield Label("Enter path:")
+                yield Input(placeholder="/home/user/...")
+
+            def on_input_submit(self, event: Input.Submit) -> None:
+                on_submit(event.value)
+
+        self.push_screen(PathInput())
