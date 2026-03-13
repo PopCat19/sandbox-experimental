@@ -33,6 +33,8 @@ Examples:
   %(prog)s file.json analyze            # Explicit analyze subcommand
   %(prog)s file.json summary            # Compact summary
   %(prog)s file.json lint               # Show lint findings
+  %(prog)s file.json strings            # Extract unique strings (raw)
+  %(prog)s file.json strings --sort     # Extract unique strings (sorted)
   %(prog)s file.json --json             # JSON output
   %(prog)s file.json --section health   # Show only health section
   %(prog)s file.json --channel 7        # Limit to channel 7
@@ -91,6 +93,17 @@ Examples:
         help="Emit machine-readable JSON",
     )
 
+    strings_parser = subparsers.add_parser(
+        "strings",
+        help="Extract unique string values (raw output)",
+    )
+    strings_parser.add_argument("file", nargs="?", help="Path to a JSON file")
+    strings_parser.add_argument(
+        "--sort",
+        action="store_true",
+        help="Sort output alphabetically",
+    )
+
     return parser
 
 
@@ -137,7 +150,7 @@ def main() -> int:
 
     # Pre-process to allow: script.py file.json (without subcommand)
     raw = sys.argv[1:]
-    if raw and not raw[0].startswith("-") and not raw[0] in ("analyze", "summary", "lint"):
+    if raw and not raw[0].startswith("-") and raw[0] not in ("analyze", "summary", "lint", "strings"):
         # Insert "analyze" as default subcommand
         sys.argv.insert(1, "analyze")
 
@@ -145,6 +158,11 @@ def main() -> int:
 
     command = args.command or "analyze"
     file_path = resolve_input_path(getattr(args, "file", None))
+
+    # Strings command doesn't need JummBox validation
+    if command == "strings":
+        output_raw_strings(file_path, sort_output=getattr(args, "sort", False))
+        return 0
 
     validate_jummbox_file(file_path)
 
@@ -168,6 +186,34 @@ def main() -> int:
 
     print(format_report(report, section=getattr(args, "section", None)))
     return 0
+
+
+def output_raw_strings(file_path: Path, sort_output: bool = False) -> None:
+    """Extract and print all unique string values from JSON."""
+    from collections import Counter
+
+    def walk_strings(value, counter):
+        if isinstance(value, str):
+            counter[value] += 1
+        elif isinstance(value, list):
+            for item in value:
+                walk_strings(item, counter)
+        elif isinstance(value, dict):
+            for item in value.values():
+                walk_strings(item, counter)
+
+    try:
+        data = json.loads(file_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print(f"Error: Invalid JSON: {exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
+
+    counter = Counter()
+    walk_strings(data, counter)
+
+    strings = sorted(counter.keys()) if sort_output else [s for s, _ in counter.most_common()]
+    for s in strings:
+        print(s)
 
 
 if __name__ == "__main__":
