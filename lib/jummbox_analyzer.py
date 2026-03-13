@@ -1533,3 +1533,110 @@ def format_song_info(info: SongInfo) -> str:
         lines.append(f"Estimated duration: {mins}:{secs:05.2f}")
 
     return "\n".join(lines)
+
+
+def apply_fixes(
+    data: JsonDict,
+    dry_run: bool = False,
+    remove_unused: bool = False,
+    remove_stale: bool = False,
+    dedupe: bool = False,
+    fix_refs: bool = False,
+) -> str:
+    lines: list[str] = []
+    channels = get_channels(data)
+
+    for channel_index, channel in enumerate(channels):
+        patterns = ensure_list(channel.get("patterns"))
+        sequence = ensure_list(channel.get("sequence"))
+
+        # Find used pattern indexes
+        used_patterns: set[int] = set()
+        for entry in sequence:
+            if isinstance(entry, int) and 0 <= entry < len(patterns):
+                used_patterns.add(entry)
+
+        if remove_unused:
+            # Remove empty patterns that are not used
+            new_patterns = []
+            old_to_new: dict[int, int] = {}
+            new_index = 0
+
+            for idx, pattern in enumerate(patterns):
+                notes = ensure_list(pattern.get("notes"))
+                is_empty = len(notes) == 0
+                is_unused = idx not in used_patterns
+
+                if is_empty and is_unused:
+                    lines.append(f"Channel {channel_index}: removed empty pattern {idx}")
+                    continue
+
+                if idx != new_index:
+                    old_to_new[idx] = new_index
+                new_patterns.append(pattern)
+                new_index += 1
+
+            if new_patterns != patterns:
+                channel["patterns"] = new_patterns
+                # Update sequence references
+                if old_to_new:
+                    new_sequence = []
+                    for entry in sequence:
+                        if isinstance(entry, int) and entry in old_to_new:
+                            new_sequence.append(old_to_new[entry])
+                        else:
+                            new_sequence.append(entry)
+                    channel["sequence"] = new_sequence
+                    lines.append(
+                        f"Channel {channel_index}: remapped sequence references"
+                    )
+
+        if dedupe:
+            # Find and remove duplicate patterns
+            groups_by_sig: dict[str, list[int]] = defaultdict(list)
+            for idx, pattern in enumerate(patterns):
+                if isinstance(pattern, dict):
+                    sig = normalize_pattern(pattern)
+                    groups_by_sig[sig].append(idx)
+
+            old_to_new = {}
+            new_patterns = []
+            new_index = 0
+
+            for idx, pattern in enumerate(patterns):
+                if isinstance(pattern, dict):
+                    sig = normalize_pattern(pattern)
+                    first_idx = groups_by_sig[sig][0]
+
+                    if idx == first_idx:
+                        # Keep first occurrence
+                        if idx != new_index:
+                            old_to_new[idx] = new_index
+                        new_patterns.append(pattern)
+                        new_index += 1
+                    else:
+                        # This is a duplicate
+                        lines.append(
+                            f"Channel {channel_index}: pattern {idx} is duplicate of {first_idx}"
+                        )
+                        if idx in used_patterns:
+                            old_to_new[idx] = old_to_new.get(first_idx, first_idx)
+                else:
+                    # Keep non-dict patterns as-is
+                    new_patterns.append(pattern)
+
+            if old_to_new:
+                channel["patterns"] = new_patterns
+                new_sequence = []
+                for entry in sequence:
+                    if isinstance(entry, int) and entry in old_to_new:
+                        new_sequence.append(old_to_new[entry])
+                    else:
+                        new_sequence.append(entry)
+                channel["sequence"] = new_sequence
+                lines.append(f"Channel {channel_index}: deduplicated patterns")
+
+    if not lines:
+        return "No changes made."
+
+    return "\n".join(lines)

@@ -33,6 +33,7 @@ from lib.jummbox_analyzer import load_json_file
 from lib.jummbox_analyzer import report_to_json_dict
 from lib.jummbox_analyzer import validate_jummbox_file
 from lib.jummbox_analyzer import build_chords
+from lib.jummbox_analyzer import apply_fixes
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -189,6 +190,41 @@ Examples:
         help="Limit to one channel",
     )
 
+    fix_parser = subparsers.add_parser(
+        "fix",
+        help="Apply cleanup fixes to the JSON file",
+    )
+    fix_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+    fix_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without modifying the file",
+    )
+    fix_parser.add_argument(
+        "--remove-unused",
+        action="store_true",
+        help="Remove unused empty patterns",
+    )
+    fix_parser.add_argument(
+        "--remove-stale",
+        action="store_true",
+        help="Remove stale (unused non-empty) patterns",
+    )
+    fix_parser.add_argument(
+        "--dedupe",
+        action="store_true",
+        help="Remove duplicate patterns",
+    )
+    fix_parser.add_argument(
+        "--fix-refs",
+        action="store_true",
+        help="Fix invalid sequence references",
+    )
+    fix_parser.add_argument(
+        "--output",
+        help="Output file path (default: overwrite input)",
+    )
+
     return parser
 
 
@@ -276,6 +312,7 @@ def main() -> int:
         "arrangement",
         "roles",
         "chords",
+        "fix",
     )
 
     # Heuristic: if first arg looks like a file path (not a command), inject analyze
@@ -349,6 +386,46 @@ def main() -> int:
         channel_filter = getattr(args, "channel", None)
         chord_progression = build_chords(data, window=window, channel_filter=channel_filter)
         print(format_chords(chord_progression))
+        return 0
+
+    if command == "fix":
+        dry_run = getattr(args, "dry_run", False)
+        output_path = getattr(args, "output", None)
+        remove_unused = getattr(args, "remove_unused", False)
+        remove_stale = getattr(args, "remove_stale", False)
+        dedupe = getattr(args, "dedupe", False)
+        fix_refs = getattr(args, "fix_refs", False)
+
+        if not any([remove_unused, remove_stale, dedupe, fix_refs]):
+            print(
+                "Error: No fix options specified. Use --remove-unused, --remove-stale, "
+                "--dedupe, or --fix-refs",
+                file=sys.stderr,
+            )
+            return 1
+
+        result = apply_fixes(
+            data,
+            dry_run=dry_run,
+            remove_unused=remove_unused,
+            remove_stale=remove_stale,
+            dedupe=dedupe,
+            fix_refs=fix_refs,
+        )
+
+        if dry_run:
+            print("=== Dry Run - No changes made ===")
+        else:
+            print("=== Applied fixes ===")
+
+        print(result)
+
+        if not dry_run:
+            out_file = Path(output_path) if output_path else file_path
+            with out_file.open("w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            print(f"\nWritten to: {out_file}")
+
         return 0
 
     # Commands that need full analysis
