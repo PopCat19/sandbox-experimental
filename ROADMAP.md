@@ -19,8 +19,8 @@ Feature implementation plan sorted by quality-of-life impact.
 - [x] Heuristics: instrument type, pitch range, note density, polyphony
 
 ### 4. Chord estimation
-- [ ] Estimate chord names from simultaneous pitched notes
-- [ ] Options: `--window bar`, `--window half-bar`, `--window beat`
+- [x] Estimate chord names from simultaneous pitched notes
+- [x] Options: `--window bar`, `--window half-bar`, `--window beat`
 
 ### 5. Better summary mode
 - [ ] Top 3 issues
@@ -108,6 +108,8 @@ Feature implementation plan sorted by quality-of-life impact.
 - Added `timeline` subcommand (sequence reconstruction)
 - Added `arrangement` subcommand (bar-by-bar grid view)
 - Added `roles` subcommand (channel role detection)
+- Added `chords` subcommand (chord progression estimation)
+- Fixed CLI: command-first pattern required (`timeline file.json` not `file.json timeline`)
 
 ### 2026-03-12
 - Added `strings` subcommand for raw unique string extraction

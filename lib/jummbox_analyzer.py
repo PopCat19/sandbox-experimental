@@ -849,19 +849,58 @@ def format_string_frequency(report: AnalysisReport) -> list[str]:
 
 def format_summary(report: AnalysisReport) -> str:
     counts = report.cleanup_candidate_counts
+    info = build_song_info(load_json_file(report.file_path))
+    roles = guess_channel_roles(load_json_file(report.file_path))
+
     lines = [
         "=== JummBox Summary ===",
         f"File: {report.file_path}",
+        "",
+        "--- Structure ---",
         f"Channels: {report.channel_count}",
         f"Instruments: {report.instrument_count}",
         f"Patterns: {report.pattern_count}",
         f"Notes: {report.note_count}",
-        f"Empty patterns: {report.empty_pattern_count}",
-        f"Unreferenced patterns: {counts.unused_patterns}",
-        f"Duplicate pattern groups: {counts.duplicate_pattern_groups}",
-        f"Warnings: {len(report.lint_findings)}",
-        f"Health: {report.health_summary.status}",
+        "",
+        "--- Duration ---",
+        f"Bars: {info.total_bars}",
     ]
+
+    if info.beats_per_minute:
+        lines.append(f"Tempo: {info.beats_per_minute} BPM")
+
+    if info.estimated_duration_seconds:
+        mins = int(info.estimated_duration_seconds // 60)
+        secs = info.estimated_duration_seconds % 60
+        lines.append(f"Duration: {mins}:{secs:05.2f}")
+
+    lines.append("")
+    lines.append("--- Content Usage ---")
+    lines.append(f"Empty patterns: {report.empty_pattern_count}")
+    lines.append(f"Unreferenced patterns: {counts.unused_patterns}")
+    lines.append(f"Duplicate pattern groups: {counts.duplicate_pattern_groups}")
+    lines.append("")
+
+    # Channel roles
+    lines.append("--- Channel Roles ---")
+    role_counts: dict[str, int] = {}
+    for role in roles:
+        role_counts[role.role] = role_counts.get(role.role, 0) + 1
+    for role_name, count in sorted(role_counts.items()):
+        lines.append(f"{role_name}: {count} channels")
+    lines.append("")
+
+    # Health
+    lines.append("--- Health ---")
+    lines.append(f"Status: {report.health_summary.status}")
+    if report.health_summary.reasons:
+        lines.append("Top issues:")
+        for reason in report.health_summary.reasons[:3]:
+            lines.append(f"  - {reason}")
+
+    if report.lint_findings:
+        lines.append(f"Total warnings: {len(report.lint_findings)}")
+
     return "\n".join(lines)
 
 
