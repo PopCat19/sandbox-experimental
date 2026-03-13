@@ -1204,9 +1204,8 @@ def format_timeline(
     RED = "\033[31m" if use_color else ""
     RESET = "\033[0m" if use_color else ""
 
-    # Pattern color palette - P0 is dim, rest get distinct colors
+    # Pattern color palette - only absolute P0 is dim, others get distinct colors
     PATTERN_COLORS = [
-        "\033[2m",   # P0: dim
         "\033[32m",  # P1: green
         "\033[33m",  # P2: yellow
         "\033[35m",  # P3: magenta
@@ -1214,12 +1213,15 @@ def format_timeline(
         "\033[34m",  # P5: blue
         "\033[91m",  # P6: bright red
         "\033[92m",  # P7: bright green
+        "\033[93m",  # P8: bright yellow
     ]
 
     def get_pattern_color(pattern_index: int) -> str:
         if not use_color:
             return ""
-        return PATTERN_COLORS[pattern_index % len(PATTERN_COLORS)]
+        if pattern_index == 0:
+            return "\033[2m"  # Only absolute P0 is dim
+        return PATTERN_COLORS[(pattern_index - 1) % len(PATTERN_COLORS)]
 
     lines = [f"{BOLD}=== Timeline ==={RESET}"]
     current_slot = -1
