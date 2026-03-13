@@ -925,6 +925,13 @@ def format_lint(report: AnalysisReport) -> str:
         if finding.value is not None:
             if finding.code == "sparse-pattern":
                 parts.append(f"density={finding.value}")
+            elif finding.code == "invalid-sequence-ref":
+                # Look up pattern count for this channel to suggest valid range
+                for row in report.unused_pattern_rows:
+                    if row.channel == finding.channel:
+                        parts.append(f"valid_range=0-{row.total-1}")
+                        break
+                parts.append(f"value={finding.value}")
             else:
                 parts.append(f"value={finding.value}")
 
