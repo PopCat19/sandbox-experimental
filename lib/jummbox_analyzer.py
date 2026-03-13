@@ -1202,8 +1202,24 @@ def format_timeline(
     CYAN = "\033[36m" if use_color else ""
     YELLOW = "\033[33m" if use_color else ""
     RED = "\033[31m" if use_color else ""
-    GREEN = "\033[32m" if use_color else ""
     RESET = "\033[0m" if use_color else ""
+
+    # Pattern color palette (8 distinct colors for pattern differentiation)
+    PATTERN_COLORS = [
+        "\033[32m",  # green
+        "\033[33m",  # yellow
+        "\033[35m",  # magenta
+        "\033[36m",  # cyan
+        "\033[34m",  # blue
+        "\033[91m",  # bright red
+        "\033[92m",  # bright green
+        "\033[93m",  # bright yellow
+    ]
+
+    def get_pattern_color(pattern_index: int) -> str:
+        if not use_color:
+            return ""
+        return PATTERN_COLORS[pattern_index % len(PATTERN_COLORS)]
 
     lines = [f"{BOLD}=== Timeline ==={RESET}"]
     current_slot = -1
@@ -1218,7 +1234,8 @@ def format_timeline(
             current_slot = event.slot
 
         if event.pattern_index is not None:
-            pattern_str = f"{GREEN}P{event.pattern_index}{RESET}"
+            color = get_pattern_color(event.pattern_index)
+            pattern_str = f"{color}P{event.pattern_index}{RESET}"
         else:
             pattern_str = f"{DIM}--{RESET}"
 

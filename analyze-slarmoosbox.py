@@ -140,9 +140,9 @@ Examples:
         help="Include note counts per pattern",
     )
     timeline_parser.add_argument(
-        "--pager",
+        "--no-pager",
         action="store_true",
-        help="Pipe output through less for scrolling",
+        help="Disable pager (print directly to terminal)",
     )
     timeline_parser.add_argument(
         "--color",
@@ -161,9 +161,9 @@ Examples:
     )
     arrangement_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
     arrangement_parser.add_argument(
-        "--pager",
+        "--no-pager",
         action="store_true",
-        help="Pipe output through less for scrolling",
+        help="Disable pager (print directly to terminal)",
     )
 
     roles_parser = subparsers.add_parser(
@@ -213,35 +213,35 @@ def resolve_input_path(file_arg: str | None) -> Path:
     raise SystemExit(1)
 
 
-def run_pager(text: str) -> None:
+LESS_TIP = "\n\033[2mTip: Press 'q' to quit, '/' to search, arrow keys to scroll\033[0m\n"
+
+
+def run_pager(text: str, show_tip: bool = True) -> None:
     """Pipe text through less for scrolling."""
     import subprocess
     import shutil
 
     pager = shutil.which("less")
     if pager:
+        full_text = text
+        if show_tip:
+            full_text += LESS_TIP
         proc = subprocess.Popen(
             [pager, "-R", "-F", "-X", "-K"],
             stdin=subprocess.PIPE,
         )
-        proc.communicate(input=text.encode("utf-8"))
+        proc.communicate(input=full_text.encode("utf-8"))
     else:
         print(text)
 
 
-def should_use_color(force_color: bool, force_no_color: bool, pager: bool) -> bool:
+def should_use_color(force_color: bool, force_no_color: bool) -> bool:
     """Determine if color output should be used."""
-    import os
-
     if force_color:
         return True
     if force_no_color:
         return False
-
-    # Auto-detect: use color if stdout is a TTY or pager is enabled
-    if pager:
-        return True
-    return sys.stdout.isatty() or os.environ.get("TERM") is not None
+    return True
 
 
 def main() -> int:
@@ -284,17 +284,17 @@ def main() -> int:
 
     if command == "timeline":
         events = build_timeline(data, channel_filter=getattr(args, "channel", None))
+        use_pager = not getattr(args, "no_pager", False)
         use_color = should_use_color(
             force_color=getattr(args, "color", False),
             force_no_color=getattr(args, "no_color", False),
-            pager=getattr(args, "pager", False),
         )
         output = format_timeline(
             events,
             show_notes=getattr(args, "notes", False),
             use_color=use_color,
         )
-        if getattr(args, "pager", False):
+        if use_pager:
             run_pager(output)
         else:
             print(output)
@@ -304,7 +304,7 @@ def main() -> int:
         arrangement = build_arrangement(data)
         channels = get_channels(data)
         output = format_arrangement(arrangement, channel_count=len(channels))
-        if getattr(args, "pager", False):
+        if not getattr(args, "no_pager", False):
             run_pager(output)
         else:
             print(output)
