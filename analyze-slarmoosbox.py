@@ -213,7 +213,7 @@ def resolve_input_path(file_arg: str | None) -> Path:
     raise SystemExit(1)
 
 
-LESS_TIP = "\n\033[2mTip: Press 'q' to quit, '/' to search, arrow keys to scroll\033[0m\n"
+LESS_TIP = "\033[2m[Less: q=quit, Space/PageDown=next, b=back, /=search, j/k=line down/up]\033[0m\n\n"
 
 
 def run_pager(text: str, show_tip: bool = True) -> None:
@@ -225,7 +225,7 @@ def run_pager(text: str, show_tip: bool = True) -> None:
     if pager:
         full_text = text
         if show_tip:
-            full_text += LESS_TIP
+            full_text = LESS_TIP + full_text
         proc = subprocess.Popen(
             [pager, "-R", "-F", "-X", "-K"],
             stdin=subprocess.PIPE,
