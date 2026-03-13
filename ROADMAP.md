@@ -5,18 +5,18 @@ Feature implementation plan sorted by quality-of-life impact.
 ## Priority 1: Timeline & Arrangement (High QoL)
 
 ### 1. Timeline reconstruction command
-- [ ] Add `timeline` subcommand
-- [ ] Reconstruct song arrangement from `sequence + patterns + notes`
-- [ ] Output: sequence slot, channel, pattern, tick range, note summary
+- [x] Add `timeline` subcommand
+- [x] Reconstruct song arrangement from `sequence + patterns + notes`
+- [x] Output: sequence slot, channel, pattern, tick range, note summary
 
 ### 2. Bar-by-bar arrangement view
-- [ ] Add `arrangement` subcommand
-- [ ] Compact grid showing pattern per channel per bar/slot
-- [ ] Reveal structure, repetition, intros, drops
+- [x] Add `arrangement` subcommand
+- [x] Compact grid showing pattern per channel per bar/slot
+- [x] Reveal structure, repetition, intros, drops
 
 ### 3. Channel role guessing
-- [ ] Detect: melody, chords, bass, drums/noise, modulation, utility
-- [ ] Heuristics: instrument type, pitch range, note density, polyphony
+- [x] Detect: melody, chords, bass, drums/noise, modulation, utility
+- [x] Heuristics: instrument type, pitch range, note density, polyphony
 
 ### 4. Chord estimation
 - [ ] Estimate chord names from simultaneous pitched notes
@@ -59,9 +59,9 @@ Feature implementation plan sorted by quality-of-life impact.
 - [ ] Cluster repeated arrangement blocks
 
 ### 11. Bar length / duration reporting
-- [ ] Total bars/slots
-- [ ] Estimated real time duration
-- [ ] Tempo if available
+- [x] Total bars/slots
+- [x] Estimated real time duration
+- [x] Tempo if available
 
 ### 12. Channel filtering improvements
 - [ ] Multiple channels: `--channel 0,1,2`
@@ -102,6 +102,12 @@ Feature implementation plan sorted by quality-of-life impact.
 ---
 
 ## Implementation Log
+
+### 2026-03-13
+- Added `info` subcommand (tempo, bars, duration)
+- Added `timeline` subcommand (sequence reconstruction)
+- Added `arrangement` subcommand (bar-by-bar grid view)
+- Added `roles` subcommand (channel role detection)
 
 ### 2026-03-12
 - Added `strings` subcommand for raw unique string extraction
