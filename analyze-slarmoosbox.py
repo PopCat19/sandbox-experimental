@@ -227,7 +227,7 @@ def run_pager(text: str, show_tip: bool = True) -> None:
         if show_tip:
             full_text = LESS_TIP + full_text
         proc = subprocess.Popen(
-            [pager, "-R", "-F", "-X", "-K"],
+            [pager, "-R", "-F", "-X", "-K", "-S"],
             stdin=subprocess.PIPE,
         )
         proc.communicate(input=full_text.encode("utf-8"))
