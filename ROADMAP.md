@@ -23,30 +23,30 @@ Feature implementation plan sorted by quality-of-life impact.
 - [x] Options: `--window bar`, `--window half-bar`, `--window beat`
 
 ### 5. Better summary mode
-- [ ] Top 3 issues
-- [ ] Likely channel roles
-- [ ] Total used vs unused content
-- [ ] Approximate length in bars
-- [ ] Busiest channels, most repeated patterns
+- [x] Top 3 issues
+- [x] Likely channel roles
+- [x] Total used vs unused content
+- [x] Approximate length in bars
+- [x] Busiest channels, most repeated patterns
 
 ## Priority 2: Diagnostics & Cleanup
 
 ### 6. Sequence reference diagnostics
-- [ ] Show exact channel and slot for invalid refs
-- [ ] Suggest nearest valid pattern index
-- [ ] Distinguish null/empty/rest-like from bad refs
+- [x] Show exact channel and slot for invalid refs
+- [x] Suggest nearest valid pattern index
+- [x] Distinguish null/empty/rest-like from bad refs
 
 ### 7. Cleanup/fix mode
-- [ ] `fix --dry-run` / `fix --apply`
-- [ ] Remove unused empty patterns
-- [ ] Report stale non-empty patterns
+- [x] `fix --dry-run` / `fix --apply`
+- [x] Remove unused empty patterns
+- [x] Report stale non-empty patterns
 - [ ] Compact pattern banks
 - [ ] Remove invalid sequence refs
-- [ ] Deduplicate exact copies
+- [x] Deduplicate exact copies
 
 ### 8. Activity heatmap
-- [ ] Text-mode visualization of channel activity across time
-- [ ] Highlight drops, transitions, sparse sections
+- [x] Text-mode visualization of channel activity across time
+- [x] Highlight drops, transitions, sparse sections
 
 ## Priority 3: Analysis Improvements
 
