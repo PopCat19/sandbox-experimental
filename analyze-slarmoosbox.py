@@ -22,6 +22,7 @@ from lib.jummbox_analyzer import build_timeline
 from lib.jummbox_analyzer import format_arrangement
 from lib.jummbox_analyzer import format_channel_roles
 from lib.jummbox_analyzer import format_chords
+from lib.jummbox_analyzer import format_heatmap
 from lib.jummbox_analyzer import format_lint
 from lib.jummbox_analyzer import format_report
 from lib.jummbox_analyzer import format_song_info
@@ -34,6 +35,7 @@ from lib.jummbox_analyzer import report_to_json_dict
 from lib.jummbox_analyzer import validate_jummbox_file
 from lib.jummbox_analyzer import build_chords
 from lib.jummbox_analyzer import apply_fixes
+from lib.jummbox_analyzer import build_heatmap
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -225,6 +227,17 @@ Examples:
         help="Output file path (default: overwrite input)",
     )
 
+    heatmap_parser = subparsers.add_parser(
+        "heatmap",
+        help="Show text-mode activity heatmap across time",
+    )
+    heatmap_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+    heatmap_parser.add_argument(
+        "--no-pager",
+        action="store_true",
+        help="Disable pager (print directly to terminal)",
+    )
+
     return parser
 
 
@@ -313,6 +326,7 @@ def main() -> int:
         "roles",
         "chords",
         "fix",
+        "heatmap",
     )
 
     # Heuristic: if first arg looks like a file path (not a command), inject analyze
@@ -426,6 +440,15 @@ def main() -> int:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             print(f"\nWritten to: {out_file}")
 
+        return 0
+
+    if command == "heatmap":
+        heatmap_data = build_heatmap(data)
+        output = format_heatmap(heatmap_data)
+        if not getattr(args, "no_pager", False):
+            run_pager(output)
+        else:
+            print(output)
         return 0
 
     # Commands that need full analysis

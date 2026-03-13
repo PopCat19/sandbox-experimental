@@ -1640,3 +1640,89 @@ def apply_fixes(
         return "No changes made."
 
     return "\n".join(lines)
+
+
+# Heatmap data structures
+@dataclass(frozen=True)
+class HeatmapRow:
+    slot: int
+    channel_activity: tuple[int, ...]  # note count per channel
+
+
+def build_heatmap(data: JsonDict) -> list[HeatmapRow]:
+    channels = get_channels(data)
+    pattern_ticks = get_pattern_length(data)
+    max_slots = 0
+
+    for channel in channels:
+        seq = ensure_list(channel.get("sequence"))
+        max_slots = max(max_slots, len(seq))
+
+    rows: list[HeatmapRow] = []
+
+    for slot in range(max_slots):
+        activity: list[int] = []
+
+        for channel in channels:
+            patterns = ensure_list(channel.get("patterns"))
+            sequence = ensure_list(channel.get("sequence"))
+
+            if slot < len(sequence):
+                entry = sequence[slot]
+                if isinstance(entry, int) and 0 <= entry < len(patterns):
+                    pattern = patterns[entry]
+                    notes = ensure_list(pattern.get("notes"))
+                    activity.append(len(notes))
+                else:
+                    activity.append(0)
+            else:
+                activity.append(0)
+
+        rows.append(HeatmapRow(slot=slot, channel_activity=tuple(activity)))
+
+    return rows
+
+
+def format_heatmap(rows: list[HeatmapRow]) -> str:
+    if not rows:
+        return "No heatmap data."
+
+    channel_count = len(rows[0].channel_activity) if rows else 0
+
+    # Find max notes for scaling
+    max_notes = 0
+    for row in rows:
+        for count in row.channel_activity:
+            max_notes = max(max_notes, count)
+
+    # Character ramp for density
+    chars = " .:-=+*#%@"
+
+    lines = ["=== Activity Heatmap ==="]
+    lines.append("(Each column is a channel, each row is a bar/slot)")
+    lines.append("")
+
+    # Header
+    header = "Slot|"
+    for ch in range(min(channel_count, 40)):
+        header += f"{ch % 10}"
+    lines.append(header)
+    lines.append("-" * len(header))
+
+    # Data rows
+    for row in rows:
+        line = f"{row.slot:03d} |"
+        for ch in range(min(channel_count, 40)):
+            count = row.channel_activity[ch] if ch < len(row.channel_activity) else 0
+            if count == 0:
+                line += " "
+            else:
+                idx = min(int((count / max_notes) * (len(chars) - 1)), len(chars) - 1)
+                line += chars[idx]
+        lines.append(line)
+
+    lines.append("")
+    lines.append(f"Legend: space=empty, .=sparse, -=low, :+=medium, *#%@=high")
+    lines.append(f"Max notes in a pattern: {max_notes}")
+
+    return "\n".join(lines)
