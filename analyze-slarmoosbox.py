@@ -139,12 +139,22 @@ Examples:
         action="store_true",
         help="Include note counts per pattern",
     )
+    timeline_parser.add_argument(
+        "--pager",
+        action="store_true",
+        help="Pipe output through less for scrolling",
+    )
 
     arrangement_parser = subparsers.add_parser(
         "arrangement",
         help="Show bar-by-bar arrangement grid",
     )
     arrangement_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+    arrangement_parser.add_argument(
+        "--pager",
+        action="store_true",
+        help="Pipe output through less for scrolling",
+    )
 
     roles_parser = subparsers.add_parser(
         "roles",
@@ -193,6 +203,22 @@ def resolve_input_path(file_arg: str | None) -> Path:
     raise SystemExit(1)
 
 
+def run_pager(text: str) -> None:
+    """Pipe text through less for scrolling."""
+    import subprocess
+    import shutil
+
+    pager = shutil.which("less")
+    if pager:
+        proc = subprocess.Popen(
+            [pager, "-R", "-F", "-X", "-K"],
+            stdin=subprocess.PIPE,
+        )
+        proc.communicate(input=text.encode("utf-8"))
+    else:
+        print(text)
+
+
 def main() -> int:
     parser = build_parser()
 
@@ -233,13 +259,21 @@ def main() -> int:
 
     if command == "timeline":
         events = build_timeline(data, channel_filter=getattr(args, "channel", None))
-        print(format_timeline(events, show_notes=getattr(args, "notes", False)))
+        output = format_timeline(events, show_notes=getattr(args, "notes", False))
+        if getattr(args, "pager", False):
+            run_pager(output)
+        else:
+            print(output)
         return 0
 
     if command == "arrangement":
         arrangement = build_arrangement(data)
         channels = get_channels(data)
-        print(format_arrangement(arrangement, channel_count=len(channels)))
+        output = format_arrangement(arrangement, channel_count=len(channels))
+        if getattr(args, "pager", False):
+            run_pager(output)
+        else:
+            print(output)
         return 0
 
     if command == "roles":
