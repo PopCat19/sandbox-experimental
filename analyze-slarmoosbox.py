@@ -21,6 +21,7 @@ from lib.jummbox_analyzer import build_song_info
 from lib.jummbox_analyzer import build_timeline
 from lib.jummbox_analyzer import format_arrangement
 from lib.jummbox_analyzer import format_channel_roles
+from lib.jummbox_analyzer import format_chords
 from lib.jummbox_analyzer import format_lint
 from lib.jummbox_analyzer import format_report
 from lib.jummbox_analyzer import format_song_info
@@ -31,6 +32,7 @@ from lib.jummbox_analyzer import guess_channel_roles
 from lib.jummbox_analyzer import load_json_file
 from lib.jummbox_analyzer import report_to_json_dict
 from lib.jummbox_analyzer import validate_jummbox_file
+from lib.jummbox_analyzer import build_chords
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,23 +42,21 @@ def build_parser() -> argparse.ArgumentParser:
         epilog="""
 Examples:
   %(prog)s file.json                    # Run full analysis (default)
-  %(prog)s file.json analyze            # Explicit analyze subcommand
-  %(prog)s file.json summary            # Compact summary
-  %(prog)s file.json lint               # Show lint findings
-  %(prog)s file.json info               # Show song info (tempo, bars, duration)
-  %(prog)s file.json timeline           # Show timeline reconstruction
-  %(prog)s file.json arrangement        # Show bar-by-bar arrangement grid
-  %(prog)s file.json roles              # Guess channel roles (melody, bass, etc)
-  %(prog)s file.json strings            # Extract unique strings (raw)
-  %(prog)s file.json strings --sort     # Extract unique strings (sorted)
-  %(prog)s file.json --json             # JSON output
-  %(prog)s file.json --section health   # Show only health section
-  %(prog)s file.json --channel 7        # Limit to channel 7
-  %(prog)s --help                       # Show this help
+  %(prog)s timeline file.json           # Show timeline reconstruction
+  %(prog)s chords file.json            # Estimate chord progression
+  %(prog)s arrangement file.json       # Show bar-by-bar arrangement grid
+  %(prog)s roles file.json             # Guess channel roles
+  %(prog)s info file.json              # Show song info (tempo, bars, duration)
+  %(prog)s lint file.json              # Show lint findings
+  %(prog)s summary file.json           # Compact summary
+  %(prog)s strings file.json           # Extract unique strings (raw)
+  %(prog)s timeline file.json --pager  # Enable pager (default)
+  %(prog)s timeline file.json --no-pager # Disable pager
+  %(prog)s timeline file.json --color   # Enable syntax highlighting
         """.strip(),
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    subparsers = parser.add_subparsers(dest="command", required=False)
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     analyze_parser = subparsers.add_parser(
         "analyze",
@@ -172,6 +172,23 @@ Examples:
     )
     roles_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
 
+    chords_parser = subparsers.add_parser(
+        "chords",
+        help="Estimate chord names from simultaneous pitched notes",
+    )
+    chords_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+    chords_parser.add_argument(
+        "--window",
+        choices=["bar", "half-bar", "beat"],
+        default="bar",
+        help="Time window for chord detection",
+    )
+    chords_parser.add_argument(
+        "--channel",
+        type=int,
+        help="Limit to one channel",
+    )
+
     return parser
 
 
@@ -258,9 +275,21 @@ def main() -> int:
         "timeline",
         "arrangement",
         "roles",
+        "chords",
     )
-    if raw and not raw[0].startswith("-") and raw[0] not in valid_commands:
-        # Insert "analyze" as default subcommand
+
+    # Heuristic: if first arg looks like a file path (not a command), inject analyze
+    # File paths typically: start with /, contain /, or end with .json
+    def looks_like_path(arg: str) -> bool:
+        if arg.startswith("/"):
+            return True
+        if "/" in arg:
+            return True
+        if arg.endswith(".json"):
+            return True
+        return False
+
+    if raw and looks_like_path(raw[0]):
         sys.argv.insert(1, "analyze")
 
     args = parser.parse_args()
@@ -313,6 +342,13 @@ def main() -> int:
     if command == "roles":
         roles = guess_channel_roles(data)
         print(format_channel_roles(roles))
+        return 0
+
+    if command == "chords":
+        window = getattr(args, "window", "bar")
+        channel_filter = getattr(args, "channel", None)
+        chord_progression = build_chords(data, window=window, channel_filter=channel_filter)
+        print(format_chords(chord_progression))
         return 0
 
     # Commands that need full analysis

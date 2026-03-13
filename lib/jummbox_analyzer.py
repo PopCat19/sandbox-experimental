@@ -978,6 +978,17 @@ class SongInfo:
     estimated_duration_seconds: float | None
 
 
+@dataclass(frozen=True)
+class ChordSegment:
+    slot: int
+    window_start: int
+    window_end: int
+    pitches: tuple[int, ...]
+    root: str
+    quality: str
+    name: str
+
+
 def build_song_info(data: JsonDict) -> SongInfo:
     ticks_per_beat = data.get("ticksPerBeat", 4)
     beats_per_bar = data.get("beatsPerBar", 8)
@@ -1008,6 +1019,166 @@ def build_song_info(data: JsonDict) -> SongInfo:
         pattern_ticks=pattern_ticks,
         estimated_duration_seconds=estimated_duration,
     )
+
+
+# Chord detection constants
+NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+# Map of interval patterns to chord quality
+CHORD_INTERVALS = {
+    (0, 4, 7): "",       # major
+    (0, 3, 7): "m",      # minor
+    (0, 4, 7, 11): "maj7",
+    (0, 3, 7, 10): "m7",
+    (0, 4, 7, 10): "7",
+    (0, 3, 7, 9): "m6",
+    (0, 4, 8): "aug",
+    (0, 3, 6): "dim",
+    (0, 3, 6, 9): "dim7",
+    (0, 4, 6): "sus4",
+    (0, 3, 7, 11): "mMaj7",
+}
+
+
+def pitch_to_note_name(pitch: int) -> str:
+    return NOTE_NAMES[pitch % 12]
+
+
+def intervals_from_pitches(pitches: list[int]) -> tuple[int, ...]:
+    if not pitches:
+        return ()
+    root = min(pitches)
+    return tuple(sorted(set((p - root) % 12 for p in pitches)))
+
+
+def identify_chord(pitches: list[int]) -> tuple[str, str]:
+    if not pitches:
+        return ("N", "")
+
+    # Normalize to pitch classes
+    pitch_classes = [p % 12 for p in pitches]
+    unique_pitches = sorted(set(pitch_classes))
+
+    if len(unique_pitches) < 2:
+        root = pitch_to_note_name(unique_pitches[0])
+        return (root, "")
+
+    # Get intervals from root
+    intervals = intervals_from_pitches(unique_pitches)
+
+    # Try to match chord quality (considering inversions)
+    for interval_set, quality in CHORD_INTERVALS.items():
+        # Check if intervals match (allowing for different voicings)
+        if set(interval_set) == set(intervals):
+            root_note = unique_pitches[0]
+            root = pitch_to_note_name(root_note)
+            return (root, quality)
+
+    # No match - return root note with whatever intervals we have
+    root = pitch_to_note_name(min(unique_pitches))
+    return (root, f"({len(unique_pitches)}tone)")
+
+
+def build_chords(
+    data: JsonDict,
+    window: str = "bar",
+    channel_filter: int | None = None,
+) -> list[ChordSegment]:
+    channels = get_channels(data)
+    ticks_per_beat = data.get("ticksPerBeat", 4)
+    beats_per_bar = data.get("beatsPerBar", 8)
+    pattern_ticks = ticks_per_beat * beats_per_bar * 4
+
+    # Determine window size in ticks
+    if window == "beat":
+        window_ticks = ticks_per_beat
+    elif window == "half-bar":
+        window_ticks = pattern_ticks // 2
+    else:  # bar
+        window_ticks = pattern_ticks
+
+    segments: list[ChordSegment] = []
+
+    # Collect all ticks with notes from all relevant channels
+    all_ticks: dict[int, set[int]] = defaultdict(set)  # tick -> pitch classes
+
+    for channel_index, channel in enumerate(channels):
+        if channel_filter is not None and channel_index != channel_filter:
+            continue
+
+        patterns = ensure_list(channel.get("patterns"))
+        sequence = ensure_list(channel.get("sequence"))
+
+        for slot, entry in enumerate(sequence):
+            if not isinstance(entry, int) or entry < 0 or entry >= len(patterns):
+                continue
+
+            pattern = patterns[entry]
+            notes = ensure_list(pattern.get("notes"))
+            slot_start = slot * pattern_ticks
+
+            for note in notes:
+                pitches = ensure_list(note.get("pitches"))
+                note_points = ensure_list(note.get("points"))
+
+                for point in note_points:
+                    tick = point.get("tick")
+                    if isinstance(tick, int):
+                        abs_tick = slot_start + tick
+                        for pitch in pitches:
+                            if isinstance(pitch, int):
+                                all_ticks[abs_tick].add(pitch % 12)
+
+    if not all_ticks:
+        return []
+
+    # Find all windows that have notes
+    sorted_ticks = sorted(all_ticks.keys())
+    first_tick = min(sorted_ticks)
+    last_tick = max(sorted_ticks)
+
+    current_tick = (first_tick // window_ticks) * window_ticks
+
+    while current_tick <= last_tick:
+        window_end = current_tick + window_ticks
+
+        # Collect all pitches in this window
+        window_pitches: set[int] = set()
+        for tick in sorted_ticks:
+            if current_tick <= tick < window_end:
+                window_pitches.update(all_ticks[tick])
+
+        if window_pitches:
+            root, quality = identify_chord(list(window_pitches))
+            slot = current_tick // pattern_ticks
+
+            segments.append(ChordSegment(
+                slot=slot,
+                window_start=current_tick,
+                window_end=window_end,
+                pitches=tuple(sorted(window_pitches)),
+                root=root,
+                quality=quality,
+                name=root + quality if quality else root,
+            ))
+
+        current_tick = window_end
+
+    return segments
+
+
+def format_chords(chords: list[ChordSegment]) -> str:
+    if not chords:
+        return "No chords detected."
+
+    lines = ["=== Chord Progression ==="]
+    lines.append("")
+
+    for chord in chords:
+        lines.append(f"Slot {chord.slot:02d}: {chord.name:8s} "
+                     f"(ticks {chord.window_start:04d}-{chord.window_end:04d})")
+
+    return "\n".join(lines)
 
 
 def build_timeline(data: JsonDict, channel_filter: int | None = None) -> list[TimelineEvent]:
