@@ -144,6 +144,16 @@ Examples:
         action="store_true",
         help="Pipe output through less for scrolling",
     )
+    timeline_parser.add_argument(
+        "--color",
+        action="store_true",
+        help="Enable syntax highlighting",
+    )
+    timeline_parser.add_argument(
+        "--no-color",
+        action="store_true",
+        help="Disable syntax highlighting",
+    )
 
     arrangement_parser = subparsers.add_parser(
         "arrangement",
@@ -219,6 +229,21 @@ def run_pager(text: str) -> None:
         print(text)
 
 
+def should_use_color(force_color: bool, force_no_color: bool, pager: bool) -> bool:
+    """Determine if color output should be used."""
+    import os
+
+    if force_color:
+        return True
+    if force_no_color:
+        return False
+
+    # Auto-detect: use color if stdout is a TTY or pager is enabled
+    if pager:
+        return True
+    return sys.stdout.isatty() or os.environ.get("TERM") is not None
+
+
 def main() -> int:
     parser = build_parser()
 
@@ -259,7 +284,16 @@ def main() -> int:
 
     if command == "timeline":
         events = build_timeline(data, channel_filter=getattr(args, "channel", None))
-        output = format_timeline(events, show_notes=getattr(args, "notes", False))
+        use_color = should_use_color(
+            force_color=getattr(args, "color", False),
+            force_no_color=getattr(args, "no_color", False),
+            pager=getattr(args, "pager", False),
+        )
+        output = format_timeline(
+            events,
+            show_notes=getattr(args, "notes", False),
+            use_color=use_color,
+        )
         if getattr(args, "pager", False):
             run_pager(output)
         else:

@@ -1188,23 +1188,50 @@ def classify_channel(channel: JsonDict) -> tuple[str, str, list[str]]:
     return "unknown", "low", [f"avg pitch: {pitch_to_name(int(avg_pitch))}, range: {pitch_range}"]
 
 
-def format_timeline(events: list[TimelineEvent], show_notes: bool = False) -> str:
+def format_timeline(
+    events: list[TimelineEvent],
+    show_notes: bool = False,
+    use_color: bool = False,
+) -> str:
     if not events:
         return "No timeline events."
 
-    lines = ["=== Timeline ==="]
+    # ANSI color codes
+    DIM = "\033[2m" if use_color else ""
+    BOLD = "\033[1m" if use_color else ""
+    CYAN = "\033[36m" if use_color else ""
+    YELLOW = "\033[33m" if use_color else ""
+    RED = "\033[31m" if use_color else ""
+    GREEN = "\033[32m" if use_color else ""
+    RESET = "\033[0m" if use_color else ""
+
+    lines = [f"{BOLD}=== Timeline ==={RESET}"]
     current_slot = -1
 
     for event in events:
         if event.slot != current_slot:
-            lines.append(f"")
-            lines.append(f"Slot {event.slot:02d} (ticks {event.tick_start:04d}-{event.tick_end:04d}):")
+            lines.append("")
+            lines.append(
+                f"{DIM}Slot {event.slot:02d}{RESET} "
+                f"{CYAN}(ticks {event.tick_start:04d}-{event.tick_end:04d}){RESET}:"
+            )
             current_slot = event.slot
 
-        pattern_str = f"P{event.pattern_index}" if event.pattern_index is not None else "--"
-        valid_str = "" if event.is_valid else " [INVALID]"
-        notes_str = f", {event.note_count} notes" if show_notes and event.note_count > 0 else ""
-        lines.append(f"  Ch{event.channel:02d}: {pattern_str}{valid_str}{notes_str}")
+        if event.pattern_index is not None:
+            pattern_str = f"{GREEN}P{event.pattern_index}{RESET}"
+        else:
+            pattern_str = f"{DIM}--{RESET}"
+
+        if not event.is_valid:
+            valid_str = f" {RED}[INVALID]{RESET}"
+        else:
+            valid_str = ""
+
+        notes_str = ""
+        if show_notes and event.note_count > 0:
+            notes_str = f", {YELLOW}{event.note_count}{RESET} notes"
+
+        lines.append(f"  {BOLD}Ch{event.channel:02d}{RESET}: {pattern_str}{valid_str}{notes_str}")
 
     return "\n".join(lines)
 
