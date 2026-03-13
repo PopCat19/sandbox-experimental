@@ -1204,16 +1204,16 @@ def format_timeline(
     RED = "\033[31m" if use_color else ""
     RESET = "\033[0m" if use_color else ""
 
-    # Pattern color palette (8 distinct colors for pattern differentiation)
+    # Pattern color palette - P0 is dim, rest get distinct colors
     PATTERN_COLORS = [
-        "\033[32m",  # green
-        "\033[33m",  # yellow
-        "\033[35m",  # magenta
-        "\033[36m",  # cyan
-        "\033[34m",  # blue
-        "\033[91m",  # bright red
-        "\033[92m",  # bright green
-        "\033[93m",  # bright yellow
+        "\033[2m",   # P0: dim
+        "\033[32m",  # P1: green
+        "\033[33m",  # P2: yellow
+        "\033[35m",  # P3: magenta
+        "\033[36m",  # P4: cyan
+        "\033[34m",  # P5: blue
+        "\033[91m",  # P6: bright red
+        "\033[92m",  # P7: bright green
     ]
 
     def get_pattern_color(pattern_index: int) -> str:
