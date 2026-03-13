@@ -6,6 +6,7 @@
 # - Validates JummBox JSON files
 # - Computes structural and musical statistics
 # - Produces lint findings and health summaries
+# - Reconstructs timeline and arrangement views
 
 from __future__ import annotations
 
@@ -933,3 +934,339 @@ def report_to_json_dict(report: AnalysisReport) -> JsonDict:
             ],
         },
     }
+
+
+# =============================================================================
+# Timeline and Arrangement Analysis
+# =============================================================================
+
+
+@dataclass(frozen=True)
+class TimelineEvent:
+    slot: int
+    channel: int
+    pattern_index: int | None
+    tick_start: int
+    tick_end: int
+    note_count: int
+    is_valid: bool
+
+
+@dataclass(frozen=True)
+class ArrangementSlot:
+    slot: int
+    patterns: tuple[int | None, ...]
+
+
+@dataclass(frozen=True)
+class ChannelRole:
+    channel: int
+    role: str
+    confidence: str
+    reasons: list[str]
+
+
+@dataclass(frozen=True)
+class SongInfo:
+    total_bars: int
+    intro_bars: int
+    loop_bars: int
+    beats_per_minute: int | None
+    ticks_per_beat: int
+    beats_per_bar: int
+    pattern_ticks: int
+    estimated_duration_seconds: float | None
+
+
+def build_song_info(data: JsonDict) -> SongInfo:
+    ticks_per_beat = data.get("ticksPerBeat", 4)
+    beats_per_bar = data.get("beatsPerBar", 8)
+    pattern_ticks = ticks_per_beat * beats_per_bar * 4
+
+    channels = get_channels(data)
+    total_bars = 0
+    for channel in channels:
+        seq = ensure_list(channel.get("sequence"))
+        total_bars = max(total_bars, len(seq))
+
+    intro_bars = data.get("introBars", 0)
+    loop_bars = data.get("loopBars", total_bars)
+    bpm = data.get("beatsPerMinute")
+
+    estimated_duration = None
+    if isinstance(bpm, int) and bpm > 0:
+        beats_total = total_bars * beats_per_bar
+        estimated_duration = (beats_total * 60) / bpm
+
+    return SongInfo(
+        total_bars=total_bars,
+        intro_bars=intro_bars if isinstance(intro_bars, int) else 0,
+        loop_bars=loop_bars if isinstance(loop_bars, int) else total_bars,
+        beats_per_minute=bpm if isinstance(bpm, int) else None,
+        ticks_per_beat=ticks_per_beat if isinstance(ticks_per_beat, int) else 4,
+        beats_per_bar=beats_per_bar if isinstance(beats_per_bar, int) else 8,
+        pattern_ticks=pattern_ticks,
+        estimated_duration_seconds=estimated_duration,
+    )
+
+
+def build_timeline(data: JsonDict, channel_filter: int | None = None) -> list[TimelineEvent]:
+    channels = get_channels(data)
+    pattern_ticks = get_pattern_length(data)
+    events: list[TimelineEvent] = []
+
+    for channel_index, channel in enumerate(channels):
+        if channel_filter is not None and channel_index != channel_filter:
+            continue
+
+        patterns = ensure_list(channel.get("patterns"))
+        sequence = ensure_list(channel.get("sequence"))
+
+        for slot, entry in enumerate(sequence):
+            tick_start = slot * pattern_ticks
+            tick_end = tick_start + pattern_ticks
+
+            if isinstance(entry, int) and 0 <= entry < len(patterns):
+                pattern = patterns[entry]
+                notes = ensure_list(pattern.get("notes"))
+                events.append(
+                    TimelineEvent(
+                        slot=slot,
+                        channel=channel_index,
+                        pattern_index=entry,
+                        tick_start=tick_start,
+                        tick_end=tick_end,
+                        note_count=len(notes),
+                        is_valid=True,
+                    )
+                )
+            else:
+                events.append(
+                    TimelineEvent(
+                        slot=slot,
+                        channel=channel_index,
+                        pattern_index=entry if isinstance(entry, int) else None,
+                        tick_start=tick_start,
+                        tick_end=tick_end,
+                        note_count=0,
+                        is_valid=False,
+                    )
+                )
+
+    events.sort(key=lambda e: (e.slot, e.channel))
+    return events
+
+
+def build_arrangement(data: JsonDict) -> list[ArrangementSlot]:
+    channels = get_channels(data)
+    if not channels:
+        return []
+
+    max_slots = max(len(ensure_list(ch.get("sequence"))) for ch in channels)
+    arrangement: list[ArrangementSlot] = []
+
+    for slot in range(max_slots):
+        patterns: list[int | None] = []
+        for channel in channels:
+            seq = ensure_list(channel.get("sequence"))
+            if slot < len(seq):
+                entry = seq[slot]
+                patterns.append(entry if isinstance(entry, int) else None)
+            else:
+                patterns.append(None)
+
+        arrangement.append(ArrangementSlot(slot=slot, patterns=tuple(patterns)))
+
+    return arrangement
+
+
+def guess_channel_roles(data: JsonDict) -> list[ChannelRole]:
+    channels = get_channels(data)
+    roles: list[ChannelRole] = []
+
+    for channel_index, channel in enumerate(channels):
+        role, confidence, reasons = classify_channel(channel)
+        roles.append(
+            ChannelRole(
+                channel=channel_index,
+                role=role,
+                confidence=confidence,
+                reasons=reasons,
+            )
+        )
+
+    return roles
+
+
+def classify_channel(channel: JsonDict) -> tuple[str, str, list[str]]:
+    instruments = ensure_list(channel.get("instruments"))
+    patterns = ensure_list(channel.get("patterns"))
+    sequence = ensure_list(channel.get("sequence"))
+    channel_name = channel.get("name", "").lower() if isinstance(channel.get("name"), str) else ""
+
+    reasons: list[str] = []
+
+    instrument_types: Counter[str] = Counter()
+    for inst in instruments:
+        inst_type = inst.get("type")
+        if isinstance(inst_type, str):
+            instrument_types[inst_type] += 1
+
+    pitch_min: int | None = None
+    pitch_max: int | None = None
+    pitch_counts: Counter[int] = Counter()
+    total_notes = 0
+    polyphonic_notes = 0
+    has_negative_octave = False
+
+    for pattern in patterns:
+        notes = ensure_list(pattern.get("notes"))
+        for note in notes:
+            pitches = ensure_list(note.get("pitches"))
+            if len(pitches) > 1:
+                polyphonic_notes += 1
+
+            for pitch in pitches:
+                if isinstance(pitch, int):
+                    pitch_counts[pitch] += 1
+                    total_notes += 1
+                    if pitch_min is None or pitch < pitch_min:
+                        pitch_min = pitch
+                    if pitch_max is None or pitch > pitch_max:
+                        pitch_max = pitch
+                    if pitch < 12:
+                        has_negative_octave = True
+
+    used_pattern_indexes: set[int] = set()
+    for entry in sequence:
+        if isinstance(entry, int) and 0 <= entry < len(patterns):
+            used_pattern_indexes.add(entry)
+
+    used_note_count = 0
+    for idx in used_pattern_indexes:
+        notes = ensure_list(patterns[idx].get("notes"))
+        used_note_count += len(notes)
+
+    if total_notes == 0:
+        return "empty", "high", ["no notes in any pattern"]
+
+    if "drum" in channel_name or "noise" in channel_name:
+        return "drums", "high", ["channel name suggests drums/noise"]
+
+    if instrument_types.get("noise", 0) > 0:
+        return "drums", "high", [f"noise instrument type: {instrument_types['noise']}"]
+
+    if has_negative_octave:
+        reasons.append("has very low pitches (below C0)")
+        return "modulation", "medium", reasons
+
+    if "mod" in channel_name or "mod" in instrument_types:
+        reasons.append("channel/instrument name suggests modulation")
+        return "modulation", "medium", reasons
+
+    avg_pitch = sum(p * c for p, c in pitch_counts.items()) / total_notes
+    pitch_range = (pitch_max - pitch_min) if pitch_min is not None and pitch_max is not None else 0
+
+    if avg_pitch < 48 and pitch_range < 24:
+        reasons.append(f"low average pitch ({pitch_to_name(int(avg_pitch))})")
+        reasons.append(f"narrow range ({pitch_range} semitones)")
+        return "bass", "medium", reasons
+
+    if polyphonic_notes > total_notes * 0.3:
+        reasons.append(f"polyphonic: {polyphonic_notes}/{total_notes} notes have multiple pitches")
+        return "chords", "medium", reasons
+
+    if pitch_range > 24 and total_notes > 20:
+        reasons.append(f"wide pitch range ({pitch_range} semitones)")
+        reasons.append(f"many notes ({total_notes})")
+        return "melody", "medium", reasons
+
+    if used_note_count < 10:
+        reasons.append(f"very few notes used ({used_note_count})")
+        return "utility", "low", reasons
+
+    return "unknown", "low", [f"avg pitch: {pitch_to_name(int(avg_pitch))}, range: {pitch_range}"]
+
+
+def format_timeline(events: list[TimelineEvent], show_notes: bool = False) -> str:
+    if not events:
+        return "No timeline events."
+
+    lines = ["=== Timeline ==="]
+    current_slot = -1
+
+    for event in events:
+        if event.slot != current_slot:
+            lines.append(f"")
+            lines.append(f"Slot {event.slot:02d} (ticks {event.tick_start:04d}-{event.tick_end:04d}):")
+            current_slot = event.slot
+
+        pattern_str = f"P{event.pattern_index}" if event.pattern_index is not None else "--"
+        valid_str = "" if event.is_valid else " [INVALID]"
+        notes_str = f", {event.note_count} notes" if show_notes and event.note_count > 0 else ""
+        lines.append(f"  Ch{event.channel:02d}: {pattern_str}{valid_str}{notes_str}")
+
+    return "\n".join(lines)
+
+
+def format_arrangement(arrangement: list[ArrangementSlot], channel_count: int | None = None) -> str:
+    if not arrangement:
+        return "No arrangement data."
+
+    if channel_count is None:
+        channel_count = len(arrangement[0].patterns) if arrangement else 0
+
+    lines = ["=== Arrangement Grid ==="]
+    lines.append("")
+    header = "Bar |"
+    for ch in range(min(channel_count, 10)):
+        header += f" Ch{ch} |"
+    lines.append(header)
+    lines.append("-" * len(header))
+
+    for slot in arrangement:
+        row = f"{slot.slot:03d} |"
+        for ch, pattern in enumerate(slot.patterns[:10]):
+            if pattern is None:
+                row += "  -- |"
+            else:
+                row += f"  P{pattern:<2}|"
+        lines.append(row)
+
+    return "\n".join(lines)
+
+
+def format_channel_roles(roles: list[ChannelRole]) -> str:
+    if not roles:
+        return "No channel role data."
+
+    lines = ["=== Channel Roles ==="]
+    for role in roles:
+        conf_str = f" ({role.confidence})" if role.confidence != "high" else ""
+        lines.append(f"Channel {role.channel}: {role.role}{conf_str}")
+        for reason in role.reasons:
+            lines.append(f"  - {reason}")
+
+    return "\n".join(lines)
+
+
+def format_song_info(info: SongInfo) -> str:
+    lines = ["=== Song Info ==="]
+    lines.append(f"Total bars: {info.total_bars}")
+    lines.append(f"Intro bars: {info.intro_bars}")
+    lines.append(f"Loop bars: {info.loop_bars}")
+    lines.append(f"Beats per bar: {info.beats_per_bar}")
+    lines.append(f"Ticks per beat: {info.ticks_per_beat}")
+    lines.append(f"Pattern length: {info.pattern_ticks} ticks")
+
+    if info.beats_per_minute:
+        lines.append(f"Tempo: {info.beats_per_minute} BPM")
+    else:
+        lines.append("Tempo: (not set)")
+
+    if info.estimated_duration_seconds:
+        mins = int(info.estimated_duration_seconds // 60)
+        secs = info.estimated_duration_seconds % 60
+        lines.append(f"Estimated duration: {mins}:{secs:05.2f}")
+
+    return "\n".join(lines)

@@ -16,9 +16,19 @@ import sys
 from pathlib import Path
 
 from lib.jummbox_analyzer import analyze_file
+from lib.jummbox_analyzer import build_arrangement
+from lib.jummbox_analyzer import build_song_info
+from lib.jummbox_analyzer import build_timeline
+from lib.jummbox_analyzer import format_arrangement
+from lib.jummbox_analyzer import format_channel_roles
 from lib.jummbox_analyzer import format_lint
 from lib.jummbox_analyzer import format_report
+from lib.jummbox_analyzer import format_song_info
 from lib.jummbox_analyzer import format_summary
+from lib.jummbox_analyzer import format_timeline
+from lib.jummbox_analyzer import get_channels
+from lib.jummbox_analyzer import guess_channel_roles
+from lib.jummbox_analyzer import load_json_file
 from lib.jummbox_analyzer import report_to_json_dict
 from lib.jummbox_analyzer import validate_jummbox_file
 
@@ -33,6 +43,10 @@ Examples:
   %(prog)s file.json analyze            # Explicit analyze subcommand
   %(prog)s file.json summary            # Compact summary
   %(prog)s file.json lint               # Show lint findings
+  %(prog)s file.json info               # Show song info (tempo, bars, duration)
+  %(prog)s file.json timeline           # Show timeline reconstruction
+  %(prog)s file.json arrangement        # Show bar-by-bar arrangement grid
+  %(prog)s file.json roles              # Guess channel roles (melody, bass, etc)
   %(prog)s file.json strings            # Extract unique strings (raw)
   %(prog)s file.json strings --sort     # Extract unique strings (sorted)
   %(prog)s file.json --json             # JSON output
@@ -104,6 +118,40 @@ Examples:
         help="Sort output alphabetically",
     )
 
+    info_parser = subparsers.add_parser(
+        "info",
+        help="Show song info (tempo, bars, duration)",
+    )
+    info_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+
+    timeline_parser = subparsers.add_parser(
+        "timeline",
+        help="Show timeline reconstruction",
+    )
+    timeline_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+    timeline_parser.add_argument(
+        "--channel",
+        type=int,
+        help="Limit output to one channel",
+    )
+    timeline_parser.add_argument(
+        "--notes",
+        action="store_true",
+        help="Include note counts per pattern",
+    )
+
+    arrangement_parser = subparsers.add_parser(
+        "arrangement",
+        help="Show bar-by-bar arrangement grid",
+    )
+    arrangement_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+
+    roles_parser = subparsers.add_parser(
+        "roles",
+        help="Guess channel roles (melody, bass, drums, etc)",
+    )
+    roles_parser.add_argument("file", nargs="?", help="Path to a JummBox JSON file")
+
     return parser
 
 
@@ -150,7 +198,17 @@ def main() -> int:
 
     # Pre-process to allow: script.py file.json (without subcommand)
     raw = sys.argv[1:]
-    if raw and not raw[0].startswith("-") and raw[0] not in ("analyze", "summary", "lint", "strings"):
+    valid_commands = (
+        "analyze",
+        "summary",
+        "lint",
+        "strings",
+        "info",
+        "timeline",
+        "arrangement",
+        "roles",
+    )
+    if raw and not raw[0].startswith("-") and raw[0] not in valid_commands:
         # Insert "analyze" as default subcommand
         sys.argv.insert(1, "analyze")
 
@@ -165,7 +223,31 @@ def main() -> int:
         return 0
 
     validate_jummbox_file(file_path)
+    data = load_json_file(file_path)
 
+    # Commands that don't need full analysis
+    if command == "info":
+        info = build_song_info(data)
+        print(format_song_info(info))
+        return 0
+
+    if command == "timeline":
+        events = build_timeline(data, channel_filter=getattr(args, "channel", None))
+        print(format_timeline(events, show_notes=getattr(args, "notes", False)))
+        return 0
+
+    if command == "arrangement":
+        arrangement = build_arrangement(data)
+        channels = get_channels(data)
+        print(format_arrangement(arrangement, channel_count=len(channels)))
+        return 0
+
+    if command == "roles":
+        roles = guess_channel_roles(data)
+        print(format_channel_roles(roles))
+        return 0
+
+    # Commands that need full analysis
     report = analyze_file(
         file_path=file_path,
         top_n=getattr(args, "top", 20),
